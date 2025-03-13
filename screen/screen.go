@@ -21,14 +21,15 @@ func CreateScreen(s Specs) {
 	}
 	defer sdl.Quit()
 
-	window, err := sdl.CreateWindow("test", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 800, 600, sdl.WINDOW_SHOWN)
+	window, err := sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
 	defer window.Destroy()
 
 	loopable = lifecycle.Loopable{Update: update}
-	lifecycle.Run(loopable)
+	lifecycle.Register(loopable)
+	lifecycle.Run()
 }
 
 func update() {
@@ -36,7 +37,7 @@ func update() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			println("Quit")
-			lifecycle.Stop()
+			lifecycle.Stop(loopable)
 			break
 		}
 	}

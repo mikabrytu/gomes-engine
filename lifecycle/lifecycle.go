@@ -2,7 +2,7 @@ package lifecycle
 
 import (
 	"container/list"
-	"time"
+	"fmt"
 )
 
 type Loopable struct {
@@ -40,6 +40,7 @@ func Stop(l Loopable) {
 	}
 
 	if loopables.Len() == 0 {
+		fmt.Println("There's no more loopables on the list. Quitting application")
 		running = false
 	}
 }
@@ -50,7 +51,5 @@ func Run() {
 			item := Loopable(e.Value.(Loopable))
 			item.Update()
 		}
-
-		time.Sleep(500 * time.Millisecond)
 	}
 }

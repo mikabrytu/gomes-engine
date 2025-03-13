@@ -14,10 +14,12 @@ func main() {
 	gomesengine.HiGomes()
 
 	//testScreen()
-	testLifecycle()
+	//testLifecycle()
 }
 
 func testScreen() {
+	lifecycle.Init()
+
 	specs := screen.Specs{
 		Title:  "Gomes Demo",
 		Posx:   sdl.WINDOWPOS_UNDEFINED,

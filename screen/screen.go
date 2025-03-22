@@ -31,6 +31,7 @@ func Render() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			println("Quit")
+			Destroy()
 			break
 		}
 	}

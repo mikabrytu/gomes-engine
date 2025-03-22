@@ -4,10 +4,8 @@ import (
 	"fmt"
 
 	"github.com/mikabrytu/gomes-engine/lifecycle"
-	"github.com/mikabrytu/gomes-engine/screen"
+	"github.com/mikabrytu/gomes-engine/render"
 )
-
-var specs screen.Specs
 
 func HiGomes() {
 	fmt.Println("Hi Gomes!")
@@ -16,17 +14,17 @@ func HiGomes() {
 func Init() {
 	lifecycle.Init()
 
-	specs = screen.Specs{
+	specs := render.ScreenSpecs{
 		Title:  "Gomes Engine",
 		Posx:   0,
 		Posy:   0,
 		Width:  800,
 		Height: 600,
 	}
-	screen.CreateScreen(specs)
+	render.CreateScreen(specs)
 	lifecycle.Register(lifecycle.Loopable{
-		Update:  screen.Render,
-		Destroy: screen.Destroy,
+		Update:  render.Render,
+		Destroy: render.Destroy,
 	})
 }
 

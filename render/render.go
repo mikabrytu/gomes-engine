@@ -1,10 +1,10 @@
-package screen
+package render
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Specs struct {
+type ScreenSpecs struct {
 	Title  string
 	Posx   int32
 	Posy   int32
@@ -14,7 +14,7 @@ type Specs struct {
 
 var window *sdl.Window
 
-func CreateScreen(s Specs) {
+func CreateScreen(s ScreenSpecs) {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}

@@ -1,7 +1,6 @@
 package screen
 
 import (
-	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -13,34 +12,33 @@ type Specs struct {
 	Height int32
 }
 
-var loopable lifecycle.Loopable
+var window *sdl.Window
 
 func CreateScreen(s Specs) {
 	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
-	defer sdl.Quit()
 
-	window, err := sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
+	var err error
+	window, err = sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
 	}
-	defer window.Destroy()
-
-	loopable = lifecycle.Loopable{Update: update}
-	lifecycle.Register(loopable)
-	lifecycle.Run()
 }
 
-func update() {
+func Render() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			println("Quit")
-			lifecycle.Stop(loopable)
 			break
 		}
 	}
 
 	sdl.Delay(33)
+}
+
+func Destroy() {
+	defer sdl.Quit()
+	defer window.Destroy()
 }

@@ -6,8 +6,9 @@ import (
 )
 
 type Loopable struct {
-	Id     int
-	Update func()
+	Id      int
+	Update  func()
+	Destroy func()
 }
 
 var idCounter = 0
@@ -34,6 +35,7 @@ func Stop(l Loopable) {
 		item := Loopable(e.Value.(Loopable))
 
 		if l.Id == item.Id {
+			item.Destroy()
 			loopables.Remove(e)
 			break
 		}

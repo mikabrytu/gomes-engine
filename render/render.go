@@ -1,6 +1,7 @@
 package render
 
 import (
+	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -31,7 +32,7 @@ func Render() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			println("Quit")
-			Destroy()
+			lifecycle.StopById(0)
 			break
 		}
 	}

@@ -17,15 +17,22 @@ var loopables *list.List
 
 func Init() {
 	loopables = list.New()
+	idCounter = 0
 	running = true
 }
 
 func Register(l Loopable) Loopable {
-	idCounter++
 	l.Id = idCounter
-	_ = loopables.PushBack(l)
+	idCounter++
+
+	_ = loopables.PushFront(l)
 
 	return l
+}
+
+func StopById(id int) {
+	l := Loopable{Id: id}
+	Stop(l)
 }
 
 func Stop(l Loopable) {

@@ -5,21 +5,22 @@ import (
 
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func HiGomes() {
 	fmt.Println("Hi Gomes!")
 }
 
-func Init() {
+func Init(Title string, ScreenWidth, ScreenHeight int32) {
 	lifecycle.Init()
 
 	specs := render.ScreenSpecs{
-		Title:  "Gomes Engine",
-		Posx:   0,
-		Posy:   0,
-		Width:  800,
-		Height: 600,
+		Title:  Title,
+		Posx:   sdl.WINDOWPOS_CENTERED,
+		Posy:   sdl.WINDOWPOS_CENTERED,
+		Width:  ScreenWidth,
+		Height: ScreenHeight,
 	}
 	render.CreateScreen(specs)
 	lifecycle.Register(lifecycle.Loopable{

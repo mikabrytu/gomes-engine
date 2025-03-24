@@ -3,10 +3,13 @@ package lifecycle
 import (
 	"container/list"
 	"fmt"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 type Loopable struct {
 	Id      int
+	Init    func()
 	Update  func()
 	Destroy func()
 }
@@ -17,15 +20,22 @@ var loopables *list.List
 
 func Init() {
 	loopables = list.New()
+	idCounter = 0
 	running = true
 }
 
 func Register(l Loopable) Loopable {
-	idCounter++
 	l.Id = idCounter
-	_ = loopables.PushBack(l)
+	idCounter++
+
+	_ = loopables.PushFront(l)
 
 	return l
+}
+
+func StopById(id int) {
+	l := Loopable{Id: id}
+	Stop(l)
 }
 
 func Stop(l Loopable) {
@@ -47,11 +57,29 @@ func Stop(l Loopable) {
 	}
 }
 
+func Kill() {
+	loopables.Init()
+	running = false
+}
+
 func Run() {
+	if running {
+		for e := loopables.Front(); e != nil; e = e.Next() {
+			item := Loopable(e.Value.(Loopable))
+			if item.Init != nil {
+				item.Init()
+			}
+		}
+	}
+
 	for running {
 		for e := loopables.Front(); e != nil; e = e.Next() {
 			item := Loopable(e.Value.(Loopable))
-			item.Update()
+			if item.Update != nil {
+				item.Update()
+			}
 		}
+
+		sdl.Delay(33)
 	}
 }

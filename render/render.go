@@ -14,14 +14,21 @@ type ScreenSpecs struct {
 }
 
 var window *sdl.Window
+var renderer *sdl.Renderer
 
 func CreateScreen(s ScreenSpecs) {
-	if err := sdl.Init(sdl.INIT_EVERYTHING); err != nil {
+	var err error
+
+	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
 		panic(err)
 	}
 
-	var err error
 	window, err = sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
+	if err != nil {
+		panic(err)
+	}
+
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		panic(err)
 	}
@@ -33,14 +40,32 @@ func Render() {
 		case *sdl.QuitEvent:
 			println("Quit")
 			lifecycle.StopById(0)
-			break
+			return
 		}
 	}
 
-	sdl.Delay(33)
+	renderer.Present()
+	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
+	renderer.Clear()
+}
+
+func DrawSimpleShapes(shape RectSpecs, color Color) {
+	rect := sdl.Rect{
+		X: shape.PosX,
+		Y: shape.PosY,
+		W: shape.Width,
+		H: shape.Height,
+	}
+
+	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
+	renderer.DrawRect(&rect)
+	renderer.FillRect(&rect)
 }
 
 func Destroy() {
 	defer sdl.Quit()
 	defer window.Destroy()
+	defer renderer.Destroy()
+
+	lifecycle.Kill()
 }

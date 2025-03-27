@@ -22,8 +22,8 @@ func main() {
 func clicks() {
 	lifecycle.Register(lifecycle.Loopable{
 		Init: func() {
-			events.Subscribe(events.INPUT_MOUSE_CLICK, func() error {
-				println("Mouse clicked!")
+			events.Subscribe(events.INPUT_MOUSE_CLICK_DOWN, func() error {
+				println("Click Down!")
 				return nil
 			})
 		},

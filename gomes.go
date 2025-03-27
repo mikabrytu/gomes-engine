@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mikabrytu/gomes-engine/dependencies"
+	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/input"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
@@ -16,6 +17,7 @@ func HiGomes() {
 
 func Init(Title string, ScreenWidth, ScreenHeight int32) {
 	dependencies.Init()
+	events.Init()
 	lifecycle.Init()
 
 	setupScreen(Title, ScreenWidth, ScreenHeight)

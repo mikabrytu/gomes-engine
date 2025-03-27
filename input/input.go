@@ -10,11 +10,22 @@ func ListenToInput() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event.(type) {
 		case *sdl.MouseButtonEvent:
-			events.Emit(events.INPUT_MOUSE_CLICK)
+			handleMouse(event.(*sdl.MouseButtonEvent))
 		case *sdl.QuitEvent:
 			println("Quit")
 			lifecycle.StopFirst()
 			return
 		}
+	}
+}
+
+func handleMouse(e *sdl.MouseButtonEvent) {
+	events.Emit(events.INPUT_MOUSE_CLICK)
+
+	switch e.State {
+	case sdl.PRESSED:
+		events.Emit(events.INPUT_MOUSE_CLICK_DOWN)
+	case sdl.RELEASED:
+		events.Emit(events.INPUT_MOUSE_CLICK_UP)
 	}
 }

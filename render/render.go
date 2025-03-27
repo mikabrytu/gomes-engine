@@ -19,10 +19,6 @@ var renderer *sdl.Renderer
 func CreateScreen(s ScreenSpecs) {
 	var err error
 
-	if err = sdl.Init(sdl.INIT_EVERYTHING); err != nil {
-		panic(err)
-	}
-
 	window, err = sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
 	if err != nil {
 		panic(err)
@@ -63,7 +59,6 @@ func DrawSimpleShapes(shape RectSpecs, color Color) {
 }
 
 func Destroy() {
-	defer sdl.Quit()
 	defer window.Destroy()
 	defer renderer.Destroy()
 

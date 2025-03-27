@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
+	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
 )
@@ -13,8 +14,20 @@ func main() {
 	gomesengine.Init("Genius", 430, 430)
 
 	genius()
+	clicks()
 
 	gomesengine.Run()
+}
+
+func clicks() {
+	lifecycle.Register(lifecycle.Loopable{
+		Init: func() {
+			events.Subscribe(events.INPUT_MOUSE_CLICK, func() error {
+				println("Mouse clicked!")
+				return nil
+			})
+		},
+	})
 }
 
 func genius() {

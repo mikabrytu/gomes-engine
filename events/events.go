@@ -12,7 +12,7 @@ func Init() {
 	dispatcher = event.New()
 }
 
-func Subscribe(name string, callback func() error) {
+func Subscribe(name string, callback func(params ...any) error) {
 	if name == "" {
 		panic("Event Name is empty")
 	}
@@ -22,9 +22,12 @@ func Subscribe(name string, callback func() error) {
 		panic(m)
 	}
 
-	dispatcher.On(name, callback)
+	dispatcher.On(name, func(args ...any) error {
+		callback(args)
+		return nil
+	})
 }
 
-func Emit(name string) {
-	dispatcher.Go(name)
+func Emit(name string, params ...any) {
+	dispatcher.Go(name, params)
 }

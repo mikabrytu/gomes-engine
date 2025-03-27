@@ -1,6 +1,9 @@
 package input
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/veandco/go-sdl2/sdl"
+)
 
 func ListenToInput() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
@@ -9,7 +12,10 @@ func ListenToInput() {
 		switch event.(type) {
 		case *sdl.MouseButtonEvent:
 			println("Mouse button pressed")
-			break
+		case *sdl.QuitEvent:
+			println("Quit")
+			lifecycle.StopFirst()
+			return
 		}
 	}
 }

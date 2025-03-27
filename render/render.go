@@ -35,7 +35,7 @@ func Render() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
 			println("Quit")
-			lifecycle.StopById(0)
+			lifecycle.StopLast()
 			return
 		}
 	}

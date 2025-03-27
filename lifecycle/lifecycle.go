@@ -47,11 +47,6 @@ func RegisterLast(l Loopable) {
 	last = registerSpecial(l, "Last")
 }
 
-func StopById(id int) {
-	l := Loopable{Id: id}
-	Stop(l)
-}
-
 func Stop(l Loopable) {
 	var next *list.Element
 	for e := loopables.Front(); e != nil; e = next {
@@ -71,8 +66,31 @@ func Stop(l Loopable) {
 	}
 }
 
+func StopById(id int) {
+	l := Loopable{Id: id}
+	Stop(l)
+}
+
+func StopFirst() {
+	if first.Destroy != nil {
+		first.Destroy()
+	}
+
+	first = Loopable{}
+}
+
+func StopLast() {
+	if last.Destroy != nil {
+		last.Destroy()
+	}
+
+	last = Loopable{}
+}
+
 func Kill() {
 	loopables.Init()
+	first = Loopable{}
+	last = Loopable{}
 	running = false
 }
 

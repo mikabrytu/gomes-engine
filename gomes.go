@@ -25,7 +25,7 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 		Height: ScreenHeight,
 	}
 	render.CreateScreen(specs)
-	lifecycle.Register(lifecycle.Loopable{
+	lifecycle.RegisterLast(lifecycle.Loopable{
 		Update:  render.Render,
 		Destroy: render.Destroy,
 	})

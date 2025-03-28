@@ -14,6 +14,7 @@ func main() {
 	gomesengine.Init("Genius", 430, 430)
 
 	genius()
+	keyboard()
 
 	gomesengine.Run()
 }
@@ -66,6 +67,18 @@ func clicks(rect render.RectSpecs, name string) {
 			fmt.Printf("Clicked on %v\n", name)
 		}
 
+		return nil
+	})
+}
+
+func keyboard() {
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_W, func(params ...any) error {
+		println("Button pressed!")
+		return nil
+	})
+
+	events.Subscribe(events.INPUT_KEYBOARD_RELEASED_W, func(params ...any) error {
+		println("Button released!")
 		return nil
 	})
 }

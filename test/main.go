@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
+	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
 )
@@ -47,9 +48,24 @@ func drawRect(rect render.RectSpecs, color render.Color, message string) {
 	lifecycle.Register(lifecycle.Loopable{
 		Init: func() {
 			fmt.Printf("Initializing %v\n", message)
+			clicks(rect, message)
 		},
 		Update: func() {
 			render.DrawSimpleShapes(rect, color)
 		},
+	})
+}
+
+func clicks(rect render.RectSpecs, name string) {
+	events.Subscribe(events.INPUT_MOUSE_CLICK_DOWN, func(params ...any) error {
+		positions := params[0].([]any)
+		posx := positions[0].([]any)[0].(int32)
+		posy := positions[0].([]any)[1].(int32)
+
+		if posx >= rect.PosX && posx <= (rect.PosX+rect.Width) && posy >= rect.PosY && posy <= (rect.PosY+rect.Height) {
+			fmt.Printf("Clicked on %v\n", name)
+		}
+
+		return nil
 	})
 }

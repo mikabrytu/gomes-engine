@@ -1,0 +1,31 @@
+package input
+
+import (
+	"github.com/mikabrytu/gomes-engine/events"
+	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/veandco/go-sdl2/sdl"
+)
+
+func ListenToInput() {
+	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
+		switch event.(type) {
+		case *sdl.MouseButtonEvent:
+			handleMouse(event.(*sdl.MouseButtonEvent))
+		case *sdl.QuitEvent:
+			println("Quit")
+			lifecycle.StopFirst()
+			return
+		}
+	}
+}
+
+func handleMouse(e *sdl.MouseButtonEvent) {
+	events.Emit(events.INPUT_MOUSE_CLICK)
+
+	switch e.State {
+	case sdl.PRESSED:
+		events.Emit(events.INPUT_MOUSE_CLICK_DOWN, e.X, e.Y)
+	case sdl.RELEASED:
+		events.Emit(events.INPUT_MOUSE_CLICK_UP, e.X, e.Y)
+	}
+}

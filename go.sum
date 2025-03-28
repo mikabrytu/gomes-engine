@@ -1,2 +1,4 @@
+github.com/AlexanderGrom/go-event v0.0.0-20180406111247-a2f1486e096e h1:VGZKZCJ6UjcHVQmCcPynvzxXynkqbRPQw/wNO0f/1KI=
+github.com/AlexanderGrom/go-event v0.0.0-20180406111247-a2f1486e096e/go.mod h1:EDsvGVsiDX518UqAQ5Ve+zBDNZlKrh3wvYRujZmgIwo=
 github.com/veandco/go-sdl2 v0.4.40 h1:fZv6wC3zz1Xt167P09gazawnpa0KY5LM7JAvKpX9d/U=
 github.com/veandco/go-sdl2 v0.4.40/go.mod h1:OROqMhHD43nT4/i9crJukyVecjPNYYuCofep6SNiAjY=

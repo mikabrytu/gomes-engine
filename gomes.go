@@ -3,6 +3,9 @@ package gomesengine
 import (
 	"fmt"
 
+	"github.com/mikabrytu/gomes-engine/dependencies"
+	"github.com/mikabrytu/gomes-engine/events"
+	"github.com/mikabrytu/gomes-engine/input"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
 	"github.com/veandco/go-sdl2/sdl"
@@ -13,22 +16,37 @@ func HiGomes() {
 }
 
 func Init(Title string, ScreenWidth, ScreenHeight int32) {
+	dependencies.Init()
+	events.Init()
 	lifecycle.Init()
 
+	setupScreen(Title, ScreenWidth, ScreenHeight)
+	setupInput()
+}
+
+func Run() {
+	defer dependencies.Quit()
+
+	lifecycle.Run()
+}
+
+func setupScreen(title string, width, height int32) {
 	specs := render.ScreenSpecs{
-		Title:  Title,
+		Title:  title,
 		Posx:   sdl.WINDOWPOS_CENTERED,
 		Posy:   sdl.WINDOWPOS_CENTERED,
-		Width:  ScreenWidth,
-		Height: ScreenHeight,
+		Width:  width,
+		Height: height,
 	}
 	render.CreateScreen(specs)
-	lifecycle.Register(lifecycle.Loopable{
+	lifecycle.RegisterLast(lifecycle.Loopable{
 		Update:  render.Render,
 		Destroy: render.Destroy,
 	})
 }
 
-func Run() {
-	lifecycle.Run()
+func setupInput() {
+	lifecycle.RegisterFirst(lifecycle.Loopable{
+		Update: input.ListenToInput,
+	})
 }

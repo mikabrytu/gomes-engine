@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
+	"github.com/mikabrytu/gomes-engine/audio"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
@@ -65,6 +66,7 @@ func clicks(rect render.RectSpecs, name string) {
 
 		if posx >= rect.PosX && posx <= (rect.PosX+rect.Width) && posy >= rect.PosY && posy <= (rect.PosY+rect.Height) {
 			fmt.Printf("Clicked on %v\n", name)
+			audio.Play("test/assets/audio/Go.ogg")
 		}
 
 		return nil

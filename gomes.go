@@ -3,12 +3,13 @@ package gomesengine
 import (
 	"fmt"
 
+	"github.com/mikabrytu/gomes-engine/audio"
 	"github.com/mikabrytu/gomes-engine/dependencies"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/input"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
-	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/sdl" // This is just for the centered window position flag. Games will not read this
 )
 
 func HiGomes() {
@@ -22,10 +23,12 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 
 	setupScreen(Title, ScreenWidth, ScreenHeight)
 	setupInput()
+	setupAudio()
 }
 
 func Run() {
 	defer dependencies.Quit()
+	defer audio.ClearBuffer()
 
 	lifecycle.Run()
 }
@@ -33,7 +36,7 @@ func Run() {
 func setupScreen(title string, width, height int32) {
 	specs := render.ScreenSpecs{
 		Title:  title,
-		Posx:   sdl.WINDOWPOS_CENTERED,
+		Posx:   sdl.WINDOWPOS_CENTERED, // TODO: Make flags default positions
 		Posy:   sdl.WINDOWPOS_CENTERED,
 		Width:  width,
 		Height: height,
@@ -49,4 +52,8 @@ func setupInput() {
 	lifecycle.RegisterFirst(lifecycle.Loopable{
 		Update: input.ListenToInput,
 	})
+}
+
+func setupAudio() {
+	audio.Init()
 }

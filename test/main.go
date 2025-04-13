@@ -44,6 +44,8 @@ func genius() {
 	drawRect(greenRect, render.Green, "GREEN")
 	drawRect(blueRect, render.Blue, "BLUE")
 	drawRect(yellowRect, render.Yellow, "YELLOW")
+
+	audio.PlaySoundtrack("test/assets/audio/freesoftwaresong-8bit.ogg")
 }
 
 func drawRect(rect render.RectSpecs, color render.Color, message string) {
@@ -66,7 +68,7 @@ func clicks(rect render.RectSpecs, name string) {
 
 		if posx >= rect.PosX && posx <= (rect.PosX+rect.Width) && posy >= rect.PosY && posy <= (rect.PosY+rect.Height) {
 			fmt.Printf("Clicked on %v\n", name)
-			audio.Play("test/assets/audio/Go.ogg")
+			audio.PlaySFX("test/assets/audio/Go.ogg")
 		}
 
 		return nil

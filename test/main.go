@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
+	"github.com/mikabrytu/gomes-engine/audio"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/render"
@@ -43,6 +44,8 @@ func genius() {
 	drawRect(greenRect, render.Green, "GREEN")
 	drawRect(blueRect, render.Blue, "BLUE")
 	drawRect(yellowRect, render.Yellow, "YELLOW")
+
+	audio.PlaySoundtrack("test/assets/audio/freesoftwaresong-8bit.ogg")
 }
 
 func drawRect(rect render.RectSpecs, color render.Color, message string) {
@@ -65,6 +68,7 @@ func clicks(rect render.RectSpecs, name string) {
 
 		if posx >= rect.PosX && posx <= (rect.PosX+rect.Width) && posy >= rect.PosY && posy <= (rect.PosY+rect.Height) {
 			fmt.Printf("Clicked on %v\n", name)
+			audio.PlaySFX("test/assets/audio/Go.ogg")
 		}
 
 		return nil
@@ -79,6 +83,16 @@ func keyboard() {
 
 	events.Subscribe(events.INPUT_KEYBOARD_RELEASED_W, func(params ...any) error {
 		println("Button released!")
+		return nil
+	})
+
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_F, func(params ...any) error {
+		if audio.IsSoundtrackPlaying() {
+			audio.PauseSoundtrack()
+		} else {
+			audio.ResumeSoundtrack()
+		}
+
 		return nil
 	})
 }

@@ -85,4 +85,14 @@ func keyboard() {
 		println("Button released!")
 		return nil
 	})
+
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_F, func(params ...any) error {
+		if audio.IsSoundtrackPlaying() {
+			audio.PauseSoundtrack()
+		} else {
+			audio.ResumeSoundtrack()
+		}
+
+		return nil
+	})
 }

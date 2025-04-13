@@ -33,12 +33,26 @@ func PlaySFX(path string) {
 }
 
 func PlaySoundtrack(path string) {
-	music, err := mix.LoadMUS(path)
+	var err error
+
+	soundtrack, err = mix.LoadMUS(path)
 	if err != nil {
 		panic(err)
 	}
 
-	music.Play(0)
+	soundtrack.Play(0)
+}
+
+func PauseSoundtrack() {
+	mix.PauseMusic()
+}
+
+func ResumeSoundtrack() {
+	mix.ResumeMusic()
+}
+
+func IsSoundtrackPlaying() bool {
+	return mix.PlayingMusic() && !mix.PausedMusic()
 }
 
 func StopSoundtrack(finish bool) {

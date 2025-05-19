@@ -2,6 +2,7 @@ package render
 
 import (
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -45,7 +46,7 @@ func Render() {
 	renderer.Clear()
 }
 
-func DrawSimpleShapes(shape RectSpecs, color Color) {
+func DrawSimpleShapes(shape utils.RectSpecs, color Color) {
 	rect := sdl.Rect{
 		X: int32(shape.PosX),
 		Y: int32(shape.PosY),

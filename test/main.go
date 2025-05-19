@@ -41,9 +41,21 @@ func gong() {
 		Width:  pw,
 		Height: pw,
 	}
+	var direction int = 1
+	var speed int = 5
 
 	lifecycle.Register(lifecycle.GameObject{
-		Update: func() {
+		Physics: func() {
+			if (ball.PosX + ball.Width) > SCREEN_WIDTH {
+				direction = -1
+			}
+			if ball.PosX < 0 {
+				direction = 1
+			}
+
+			ball.PosX += speed * direction
+		},
+		Render: func() {
 			render.DrawSimpleShapes(ball, render.White)
 		},
 	})
@@ -51,7 +63,7 @@ func gong() {
 
 func drawPallets(rect render.RectSpecs, color render.Color) {
 	lifecycle.Register(lifecycle.GameObject{
-		Update: func() {
+		Render: func() {
 			render.DrawSimpleShapes(rect, color)
 		},
 	})

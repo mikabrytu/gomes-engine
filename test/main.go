@@ -49,8 +49,8 @@ func genius() {
 }
 
 func drawRect(rect render.RectSpecs, color render.Color, message string) {
-	lifecycle.Register(lifecycle.Loopable{
-		Init: func() {
+	lifecycle.Register(lifecycle.GameObject{
+		Start: func() {
 			fmt.Printf("Initializing %v\n", message)
 			clicks(rect, message)
 		},

@@ -43,14 +43,14 @@ func setupScreen(title string, width, height int32) {
 		Height: height,
 	}
 	render.CreateScreen(specs)
-	lifecycle.RegisterLast(lifecycle.Loopable{
+	lifecycle.RegisterLast(lifecycle.GameObject{
 		Update:  render.Render,
 		Destroy: render.Destroy,
 	})
 }
 
 func setupInput() {
-	lifecycle.RegisterFirst(lifecycle.Loopable{
+	lifecycle.RegisterFirst(lifecycle.GameObject{
 		Update: input.ListenToInput,
 	})
 }

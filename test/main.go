@@ -45,27 +45,32 @@ func gong() {
 		Width:  pw,
 		Height: pw,
 	}
-	var direction int = 1
+	var direction int = -1
 	var speed int = 5
 
 	lifecycle.Register(lifecycle.GameObject{
 		Start: func() {
 			physics.RegisterBody(&ball, "ball")
 		},
-		Update: func() {
-			bodies := physics.GetBodies()
-
-			for e := bodies.Front(); e != nil; e = e.Next() {
-				item := physics.RigidBody(e.Value.(physics.RigidBody))
-
-				if item.Name != "ball" {
-					continue
-				}
-
-				fmt.Printf("Body %s at position: (%v, %v)\n", item.Name, item.Rect.PosX, item.Rect.PosY)
-			}
-		},
 		Physics: func() {
+			body := physics.GetBodyByName("ball")
+
+			if body.Name != "nil" {
+				collider := physics.CheckCollision(body)
+				if collider.Name != "nil" {
+					if collider.Rect.PosX > ball.PosX {
+						direction = -1
+					}
+
+					if collider.Rect.PosX < ball.PosX {
+						direction = 1
+					}
+				}
+			} else {
+				fmt.Printf("Ball is not a rigidbody")
+			}
+
+			// Continue movement until end of screen
 			if (ball.PosX + ball.Width) > SCREEN_WIDTH {
 				direction = -1
 			}

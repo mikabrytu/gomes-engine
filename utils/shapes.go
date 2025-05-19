@@ -1,4 +1,4 @@
-package render
+package utils
 
 type RectSpecs struct {
 	PosX   int

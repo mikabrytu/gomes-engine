@@ -11,7 +11,8 @@ type GameObject struct {
 	Id      int
 	Start   func()
 	Update  func()
-	Fixed   func()
+	Physics func()
+	Render  func()
 	Destroy func()
 }
 
@@ -127,8 +128,15 @@ func Run() {
 
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := GameObject(e.Value.(GameObject))
-			if item.Fixed != nil {
-				item.Fixed()
+			if item.Physics != nil {
+				item.Physics()
+			}
+		}
+
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
+			if item.Render != nil {
+				item.Render()
 			}
 		}
 

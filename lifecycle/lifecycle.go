@@ -11,21 +11,22 @@ type GameObject struct {
 	Id      int
 	Start   func()
 	Update  func()
+	Fixed   func()
 	Destroy func()
 }
 
 var idCounter = 0
 var running bool = false
 var objects *list.List
-var first GameObject
-var last GameObject
+var inputLayer GameObject
+var renderLayer GameObject
 
 // Public API
 
 func Init() {
 	objects = list.New()
-	first = GameObject{}
-	last = GameObject{}
+	inputLayer = GameObject{}
+	renderLayer = GameObject{}
 	idCounter = 0
 	running = true
 }
@@ -39,12 +40,12 @@ func Register(o GameObject) GameObject {
 	return o
 }
 
-func RegisterFirst(o GameObject) {
-	first = registerSpecial(o, "First")
+func RegisterInput(o GameObject) {
+	inputLayer = registerSpecial(o, "First")
 }
 
-func RegisterLast(o GameObject) {
-	last = registerSpecial(o, "Last")
+func RegisterRender(o GameObject) {
+	renderLayer = registerSpecial(o, "Last")
 }
 
 func Stop(o GameObject) {
@@ -72,32 +73,32 @@ func StopById(id int) {
 }
 
 func StopFirst() {
-	if first.Destroy != nil {
-		first.Destroy()
+	if inputLayer.Destroy != nil {
+		inputLayer.Destroy()
 	}
 
-	first = GameObject{}
+	inputLayer = GameObject{}
 }
 
 func StopLast() {
-	if last.Destroy != nil {
-		last.Destroy()
+	if renderLayer.Destroy != nil {
+		renderLayer.Destroy()
 	}
 
-	last = GameObject{}
+	renderLayer = GameObject{}
 }
 
 func Kill() {
 	objects.Init()
-	first = GameObject{}
-	last = GameObject{}
+	inputLayer = GameObject{}
+	renderLayer = GameObject{}
 	running = false
 }
 
 func Run() {
 	if running {
-		if first.Start != nil {
-			first.Start()
+		if inputLayer.Start != nil {
+			inputLayer.Start()
 		}
 
 		for e := objects.Front(); e != nil; e = e.Next() {
@@ -107,14 +108,14 @@ func Run() {
 			}
 		}
 
-		if last.Start != nil {
-			last.Start()
+		if renderLayer.Start != nil {
+			renderLayer.Start()
 		}
 	}
 
 	for running {
-		if first.Update != nil {
-			first.Update()
+		if inputLayer.Update != nil {
+			inputLayer.Update()
 		}
 
 		for e := objects.Front(); e != nil; e = e.Next() {
@@ -124,8 +125,15 @@ func Run() {
 			}
 		}
 
-		if last.Update != nil {
-			last.Update()
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
+			if item.Fixed != nil {
+				item.Fixed()
+			}
+		}
+
+		if renderLayer.Update != nil {
+			renderLayer.Update()
 		}
 
 		sdl.Delay(33)

@@ -47,10 +47,10 @@ func Render() {
 
 func DrawSimpleShapes(shape RectSpecs, color Color) {
 	rect := sdl.Rect{
-		X: shape.PosX,
-		Y: shape.PosY,
-		W: shape.Width,
-		H: shape.Height,
+		X: int32(shape.PosX),
+		Y: int32(shape.PosY),
+		W: int32(shape.Width),
+		H: int32(shape.Height),
 	}
 
 	renderer.SetDrawColor(color.R, color.G, color.B, color.A)

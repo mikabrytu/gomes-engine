@@ -3,6 +3,7 @@ package dependencies
 import (
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 func Init() {
@@ -11,6 +12,10 @@ func Init() {
 	}
 
 	if err := mix.Init(mix.INIT_OGG); err != nil {
+		panic(err)
+	}
+
+	if err := ttf.Init(); err != nil {
 		panic(err)
 	}
 
@@ -25,6 +30,7 @@ func Init() {
 }
 
 func Quit() {
+	ttf.Quit()
 	mix.CloseAudio()
 	mix.Quit()
 	sdl.Quit()

@@ -8,6 +8,7 @@ import (
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/input"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/physics"
 	"github.com/mikabrytu/gomes-engine/render"
 	"github.com/veandco/go-sdl2/sdl" // This is just for the centered window position flag. Games will not read this
 )
@@ -23,13 +24,14 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 
 	setupScreen(Title, ScreenWidth, ScreenHeight)
 	setupInput()
+	setupPhysics()
 	setupAudio()
 }
 
 func Run() {
-	defer dependencies.Quit()
 	defer audio.StopSoundtrack(true)
 	defer audio.ClearBuffer()
+	defer dependencies.Quit()
 
 	lifecycle.Run()
 }
@@ -43,16 +45,20 @@ func setupScreen(title string, width, height int32) {
 		Height: height,
 	}
 	render.CreateScreen(specs)
-	lifecycle.RegisterLast(lifecycle.Loopable{
+	lifecycle.RegisterRender(lifecycle.GameObject{
 		Update:  render.Render,
 		Destroy: render.Destroy,
 	})
 }
 
 func setupInput() {
-	lifecycle.RegisterFirst(lifecycle.Loopable{
+	lifecycle.RegisterInput(lifecycle.GameObject{
 		Update: input.ListenToInput,
 	})
+}
+
+func setupPhysics() {
+	physics.Init()
 }
 
 func setupAudio() {

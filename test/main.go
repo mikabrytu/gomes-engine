@@ -4,95 +4,126 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
-	"github.com/mikabrytu/gomes-engine/audio"
-	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/math"
+	"github.com/mikabrytu/gomes-engine/physics"
 	"github.com/mikabrytu/gomes-engine/render"
+	"github.com/mikabrytu/gomes-engine/ui"
+	"github.com/mikabrytu/gomes-engine/utils"
 )
+
+var SCREEN_SIZE = math.Vector2{
+	X: 800,
+	Y: 600,
+}
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Genius", 430, 430)
+	gomesengine.Init("Gong", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 
-	genius()
-	keyboard()
+	gong()
 
 	gomesengine.Run()
 }
 
-func genius() {
-	var size int32 = 200
-	var offset int32 = 10
+func gong() {
+	const pw int = 50
+	const ph int = 200
+	const off int = 10
 
-	rect := render.RectSpecs{
-		PosX:   offset,
-		PosY:   offset,
-		Width:  size,
-		Height: size,
-	}
-	redRect := rect
-	greenRect := rect
-	blueRect := rect
-	yellowRect := rect
-
-	greenRect.PosX += size + offset
-	blueRect.PosY += size + offset
-	yellowRect.PosX += size + offset
-	yellowRect.PosY += size + offset
-
-	drawRect(redRect, render.Red, "RED")
-	drawRect(greenRect, render.Green, "GREEN")
-	drawRect(blueRect, render.Blue, "BLUE")
-	drawRect(yellowRect, render.Yellow, "YELLOW")
-
-	audio.PlaySoundtrack("test/assets/audio/freesoftwaresong-8bit.ogg")
+	preparePallets(off, pw, ph)
+	prepareBall(pw)
+	prepareText()
 }
 
-func drawRect(rect render.RectSpecs, color render.Color, message string) {
-	lifecycle.Register(lifecycle.Loopable{
-		Init: func() {
-			fmt.Printf("Initializing %v\n", message)
-			clicks(rect, message)
+func preparePallets(off, pw, ph int) {
+	palletLeft := utils.RectSpecs{
+		PosX:   off,
+		PosY:   (SCREEN_SIZE.Y / 2) - (ph / 2),
+		Width:  pw,
+		Height: ph,
+	}
+	palletRight := palletLeft
+	palletRight.PosX = (SCREEN_SIZE.X - (pw + off))
+
+	drawPallets(palletLeft, render.White, "palletLeft")
+	drawPallets(palletRight, render.White, "palletRight")
+}
+
+func prepareBall(pw int) {
+	ball := utils.RectSpecs{
+		PosX:   (SCREEN_SIZE.X / 2) - (pw / 2),
+		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2),
+		Width:  pw,
+		Height: pw,
+	}
+	var direction int = -1
+	var speed int = 5
+
+	lifecycle.Register(lifecycle.GameObject{
+		Start: func() {
+			physics.RegisterBody(&ball, "ball")
 		},
-		Update: func() {
+		Physics: func() {
+			body := physics.GetBodyByName("ball")
+
+			if body.Name != "nil" {
+				collider := physics.CheckCollision(body)
+				if collider.Name != "nil" {
+					if collider.Rect.PosX > ball.PosX {
+						direction = -1
+					}
+
+					if collider.Rect.PosX < ball.PosX {
+						direction = 1
+					}
+				}
+			} else {
+				fmt.Printf("Ball is not a rigidbody")
+			}
+
+			// Continue movement until end of screen
+			if (ball.PosX + ball.Width) > SCREEN_SIZE.X {
+				direction = -1
+			}
+			if ball.PosX < 0 {
+				direction = 1
+			}
+
+			ball.PosX += speed * direction
+		},
+		Render: func() {
+			render.DrawSimpleShapes(ball, render.White)
+		},
+	})
+}
+
+func prepareText() {
+	font := ui.FontSpecs{
+		Name: "Sans",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 24,
+	}
+	position := math.Vector2{X: 10, Y: 10}
+	offset := math.Vector2{X: 10, Y: 10}
+
+	p1Score := ui.NewFont(font, SCREEN_SIZE)
+	p1Score.RenderText("Player 1", render.White, position)
+	p1Score.AlignText(ui.TopLeft, offset)
+
+	position.Y = SCREEN_SIZE.Y - 10
+	p2Score := ui.NewFont(font, SCREEN_SIZE)
+	p2Score.RenderText("Player 2", render.White, position)
+	p2Score.AlignText(ui.TopRight, offset)
+}
+
+func drawPallets(rect utils.RectSpecs, color render.Color, name string) {
+	lifecycle.Register(lifecycle.GameObject{
+		Start: func() {
+			physics.RegisterBody(&rect, name)
+		},
+		Render: func() {
 			render.DrawSimpleShapes(rect, color)
 		},
-	})
-}
-
-func clicks(rect render.RectSpecs, name string) {
-	events.Subscribe(events.INPUT_MOUSE_CLICK_DOWN, func(params ...any) error {
-		positions := params[0].([]any)
-		posx := positions[0].([]any)[0].(int32)
-		posy := positions[0].([]any)[1].(int32)
-
-		if posx >= rect.PosX && posx <= (rect.PosX+rect.Width) && posy >= rect.PosY && posy <= (rect.PosY+rect.Height) {
-			fmt.Printf("Clicked on %v\n", name)
-			audio.PlaySFX("test/assets/audio/Go.ogg")
-		}
-
-		return nil
-	})
-}
-
-func keyboard() {
-	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_W, func(params ...any) error {
-		println("Button pressed!")
-		return nil
-	})
-
-	events.Subscribe(events.INPUT_KEYBOARD_RELEASED_W, func(params ...any) error {
-		println("Button released!")
-		return nil
-	})
-
-	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_F, func(params ...any) error {
-		if audio.IsSoundtrackPlaying() {
-			audio.PauseSoundtrack()
-		} else {
-			audio.ResumeSoundtrack()
-		}
-
-		return nil
 	})
 }

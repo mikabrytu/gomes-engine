@@ -7,125 +7,141 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Loopable struct {
+type GameObject struct {
 	Id      int
-	Init    func()
+	Start   func()
 	Update  func()
+	Physics func()
+	Render  func()
 	Destroy func()
 }
 
 var idCounter = 0
 var running bool = false
-var loopables *list.List
-var first Loopable
-var last Loopable
+var objects *list.List
+var inputLayer GameObject
+var renderLayer GameObject
 
 // Public API
 
 func Init() {
-	loopables = list.New()
-	first = Loopable{}
-	last = Loopable{}
+	objects = list.New()
+	inputLayer = GameObject{}
+	renderLayer = GameObject{}
 	idCounter = 0
 	running = true
 }
 
-func Register(l Loopable) Loopable {
-	l.Id = idCounter
+func Register(o GameObject) GameObject {
+	o.Id = idCounter
 	idCounter++
 
-	_ = loopables.PushFront(l)
+	_ = objects.PushFront(o)
 
-	return l
+	return o
 }
 
-func RegisterFirst(l Loopable) {
-	first = registerSpecial(l, "First")
+func RegisterInput(o GameObject) {
+	inputLayer = registerSpecial(o, "First")
 }
 
-func RegisterLast(l Loopable) {
-	last = registerSpecial(l, "Last")
+func RegisterRender(o GameObject) {
+	renderLayer = registerSpecial(o, "Last")
 }
 
-func Stop(l Loopable) {
+func Stop(o GameObject) {
 	var next *list.Element
-	for e := loopables.Front(); e != nil; e = next {
+	for e := objects.Front(); e != nil; e = next {
 		next = e.Next()
-		item := Loopable(e.Value.(Loopable))
+		item := GameObject(e.Value.(GameObject))
 
-		if l.Id == item.Id {
+		if o.Id == item.Id {
 			item.Destroy()
-			loopables.Remove(e)
+			objects.Remove(e)
 			break
 		}
 	}
 
-	if loopables.Len() == 0 {
+	if objects.Len() == 0 {
 		fmt.Println("There's no more loopables on the list. Quitting application")
 		running = false
 	}
 }
 
 func StopById(id int) {
-	l := Loopable{Id: id}
+	l := GameObject{Id: id}
 	Stop(l)
 }
 
 func StopFirst() {
-	if first.Destroy != nil {
-		first.Destroy()
+	if inputLayer.Destroy != nil {
+		inputLayer.Destroy()
 	}
 
-	first = Loopable{}
+	inputLayer = GameObject{}
 }
 
 func StopLast() {
-	if last.Destroy != nil {
-		last.Destroy()
+	if renderLayer.Destroy != nil {
+		renderLayer.Destroy()
 	}
 
-	last = Loopable{}
+	renderLayer = GameObject{}
 }
 
 func Kill() {
-	loopables.Init()
-	first = Loopable{}
-	last = Loopable{}
+	objects.Init()
+	inputLayer = GameObject{}
+	renderLayer = GameObject{}
 	running = false
 }
 
 func Run() {
 	if running {
-		if first.Init != nil {
-			first.Init()
+		if inputLayer.Start != nil {
+			inputLayer.Start()
 		}
 
-		for e := loopables.Front(); e != nil; e = e.Next() {
-			item := Loopable(e.Value.(Loopable))
-			if item.Init != nil {
-				item.Init()
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
+			if item.Start != nil {
+				item.Start()
 			}
 		}
 
-		if last.Init != nil {
-			last.Init()
+		if renderLayer.Start != nil {
+			renderLayer.Start()
 		}
 	}
 
 	for running {
-		if first.Update != nil {
-			first.Update()
+		if inputLayer.Update != nil {
+			inputLayer.Update()
 		}
 
-		for e := loopables.Front(); e != nil; e = e.Next() {
-			item := Loopable(e.Value.(Loopable))
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
 			if item.Update != nil {
 				item.Update()
 			}
 		}
 
-		if last.Update != nil {
-			last.Update()
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
+			if item.Physics != nil {
+				item.Physics()
+			}
+		}
+
+		for e := objects.Front(); e != nil; e = e.Next() {
+			item := GameObject(e.Value.(GameObject))
+			if item.Render != nil {
+				item.Render()
+			}
+		}
+
+		if renderLayer.Update != nil {
+			renderLayer.Update()
 		}
 
 		sdl.Delay(33)
@@ -134,15 +150,15 @@ func Run() {
 
 // Private Implementation
 
-func registerSpecial(l Loopable, message string) Loopable {
-	if isLoopableNil(l) {
+func registerSpecial(o GameObject, message string) GameObject {
+	if isGameObjectNil(o) {
 		m := fmt.Sprintf("Trying to register a nil loopable as %v", message)
 		panic(m)
 	}
 
-	return l
+	return o
 }
 
-func isLoopableNil(l Loopable) bool {
-	return l.Init == nil && l.Update == nil && l.Destroy == nil
+func isGameObjectNil(o GameObject) bool {
+	return o.Start == nil && o.Update == nil && o.Destroy == nil
 }

@@ -29,9 +29,9 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 }
 
 func Run() {
-	defer dependencies.Quit()
 	defer audio.StopSoundtrack(true)
 	defer audio.ClearBuffer()
+	defer dependencies.Quit()
 
 	lifecycle.Run()
 }

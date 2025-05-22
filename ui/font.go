@@ -33,10 +33,13 @@ type Font struct {
 	surface  *sdl.Surface
 	texture  *sdl.Texture
 	copy     render.CopySpecs
+	screen   math.Vector2
 }
 
-func NewFont(specs FontSpecs) *Font {
-	font := &Font{}
+func NewFont(specs FontSpecs, screenSize math.Vector2) *Font {
+	font := &Font{
+		screen: screenSize,
+	}
 
 	var err error
 	font.instance, err = ttf.OpenFont(specs.Path, specs.Size)
@@ -86,8 +89,42 @@ func (f *Font) RenderText(text string, color render.Color, position math.Vector2
 	})
 }
 
-func (f *Font) AlignText(anchor Anchor, screen math.Vector2) {
-	f.copy.Rect.X = int32(screen.X)/2 - (f.copy.Rect.W / 2)
+func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
+	switch anchor {
+	case TopLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case TopCenter:
+		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case TopRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case MiddleLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
+		break
+	case MiddleCenter:
+		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
+		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
+		break
+	case MiddleRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
+		break
+	case BottomLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
+		break
+	case BottomCenter:
+		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
+		break
+	case BottomRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
+		break
+	}
 }
 
 func (f *Font) ClearFont() {

@@ -12,12 +12,14 @@ import (
 	"github.com/mikabrytu/gomes-engine/utils"
 )
 
-const SCREEN_WIDTH = 800
-const SCREEN_HEIGHT = 600
+var SCREEN_SIZE = math.Vector2{
+	X: 800,
+	Y: 600,
+}
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Gong", SCREEN_WIDTH, SCREEN_HEIGHT)
+	gomesengine.Init("Gong", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 
 	gong()
 
@@ -37,12 +39,12 @@ func gong() {
 func preparePallets(off, pw, ph int) {
 	palletLeft := utils.RectSpecs{
 		PosX:   off,
-		PosY:   (SCREEN_HEIGHT / 2) - (ph / 2),
+		PosY:   (SCREEN_SIZE.Y / 2) - (ph / 2),
 		Width:  pw,
 		Height: ph,
 	}
 	palletRight := palletLeft
-	palletRight.PosX = (SCREEN_WIDTH - (pw + off))
+	palletRight.PosX = (SCREEN_SIZE.X - (pw + off))
 
 	drawPallets(palletLeft, render.White, "palletLeft")
 	drawPallets(palletRight, render.White, "palletRight")
@@ -50,8 +52,8 @@ func preparePallets(off, pw, ph int) {
 
 func prepareBall(pw int) {
 	ball := utils.RectSpecs{
-		PosX:   (SCREEN_WIDTH / 2) - (pw / 2),
-		PosY:   (SCREEN_HEIGHT / 2) - (pw / 2),
+		PosX:   (SCREEN_SIZE.X / 2) - (pw / 2),
+		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2),
 		Width:  pw,
 		Height: pw,
 	}
@@ -81,7 +83,7 @@ func prepareBall(pw int) {
 			}
 
 			// Continue movement until end of screen
-			if (ball.PosX + ball.Width) > SCREEN_WIDTH {
+			if (ball.PosX + ball.Width) > SCREEN_SIZE.X {
 				direction = -1
 			}
 			if ball.PosX < 0 {
@@ -103,15 +105,16 @@ func prepareText() {
 		Size: 24,
 	}
 	position := math.Vector2{X: 10, Y: 10}
+	offset := math.Vector2{X: 10, Y: 10}
 
-	p1Score := ui.NewFont(font)
-	p1Score.RenderText("Playee 1", render.Blue, position)
-	p1Score.AlignText(ui.TopCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
+	p1Score := ui.NewFont(font, SCREEN_SIZE)
+	p1Score.RenderText("Player 1", render.White, position)
+	p1Score.AlignText(ui.TopLeft, offset)
 
-	position.Y = SCREEN_HEIGHT - 10
-	p2Score := ui.NewFont(font)
-	p2Score.RenderText("Player 2", render.Green, position)
-	p2Score.AlignText(ui.BottomCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
+	position.Y = SCREEN_SIZE.Y - 10
+	p2Score := ui.NewFont(font, SCREEN_SIZE)
+	p2Score.RenderText("Player 2", render.White, position)
+	p2Score.AlignText(ui.TopRight, offset)
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {

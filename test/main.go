@@ -5,8 +5,10 @@ import (
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/physics"
 	"github.com/mikabrytu/gomes-engine/render"
+	"github.com/mikabrytu/gomes-engine/ui"
 	"github.com/mikabrytu/gomes-engine/utils"
 )
 
@@ -27,6 +29,12 @@ func gong() {
 	const ph int = 200
 	const off int = 10
 
+	preparePallets(off, pw, ph)
+	prepareBall(pw)
+	prepareText()
+}
+
+func preparePallets(off, pw, ph int) {
 	palletLeft := utils.RectSpecs{
 		PosX:   off,
 		PosY:   (SCREEN_HEIGHT / 2) - (ph / 2),
@@ -38,7 +46,9 @@ func gong() {
 
 	drawPallets(palletLeft, render.White, "palletLeft")
 	drawPallets(palletRight, render.White, "palletRight")
+}
 
+func prepareBall(pw int) {
 	ball := utils.RectSpecs{
 		PosX:   (SCREEN_WIDTH / 2) - (pw / 2),
 		PosY:   (SCREEN_HEIGHT / 2) - (pw / 2),
@@ -84,6 +94,19 @@ func gong() {
 			render.DrawSimpleShapes(ball, render.White)
 		},
 	})
+}
+
+func prepareText() {
+	font := ui.FontSpecs{
+		Name: "Sans",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 24,
+	}
+
+	position := math.Vector2{X: 10, Y: 10}
+
+	ui.LoadFont(font)
+	ui.RenderText("Gong", render.Blue, position)
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {

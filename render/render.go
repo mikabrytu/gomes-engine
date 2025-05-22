@@ -1,7 +1,10 @@
 package render
 
 import (
+	"container/list"
+
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -14,8 +17,15 @@ type ScreenSpecs struct {
 	Height int32
 }
 
+type TextureSpecs struct {
+	Texture  *sdl.Texture
+	Position math.Vector2
+	Size     math.Vector2
+}
+
 var window *sdl.Window
 var renderer *sdl.Renderer
+var renderCopies *list.List
 
 func CreateScreen(s ScreenSpecs) {
 	var err error
@@ -41,6 +51,19 @@ func Render() {
 		}
 	}
 
+	if (renderCopies != nil) && (renderCopies.Len() > 0) {
+		for e := renderCopies.Front(); e != nil; e = e.Next() {
+			specs := e.Value.(TextureSpecs)
+			rect := sdl.Rect{
+				X: int32(specs.Position.X),
+				Y: int32(specs.Position.Y),
+				W: int32(specs.Size.X),
+				H: int32(specs.Size.Y),
+			}
+			renderer.Copy(specs.Texture, nil, &rect)
+		}
+	}
+
 	renderer.Present()
 	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
 	renderer.Clear()
@@ -57,6 +80,18 @@ func DrawSimpleShapes(shape utils.RectSpecs, color Color) {
 	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
 	renderer.DrawRect(&rect)
 	renderer.FillRect(&rect)
+}
+
+func RenderTexture(texture TextureSpecs) {
+	if renderCopies == nil {
+		renderCopies = list.New()
+	}
+
+	renderCopies.PushBack(texture)
+}
+
+func GetRenderer() *sdl.Renderer {
+	return renderer
 }
 
 func Destroy() {

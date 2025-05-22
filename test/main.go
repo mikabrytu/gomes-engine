@@ -17,7 +17,7 @@ const SCREEN_HEIGHT = 600
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Genius", SCREEN_WIDTH, SCREEN_HEIGHT)
+	gomesengine.Init("Gong", SCREEN_WIDTH, SCREEN_HEIGHT)
 
 	gong()
 
@@ -107,6 +107,7 @@ func prepareText() {
 
 	ui.LoadFont(font)
 	ui.RenderText("Gong", render.Blue, position)
+	ui.AlignText(ui.TopCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {

@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/render"
 	"github.com/veandco/go-sdl2/sdl"
@@ -13,10 +14,10 @@ type FontSpecs struct {
 	Size int
 }
 
-type Alignment int
+type Anchor int
 
 const (
-	TopLeft Alignment = iota
+	TopLeft Anchor = iota
 	TopRight
 	TopCenter
 	MiddleLeft
@@ -30,7 +31,7 @@ const (
 var font *ttf.Font
 var surface *sdl.Surface
 var texture *sdl.Texture
-var specs render.TextureSpecs
+var copy render.CopySpecs
 
 func LoadFont(specs FontSpecs) {
 	var err error
@@ -59,20 +60,29 @@ func RenderText(text string, color render.Color, position math.Vector2) {
 		panic(err)
 	}
 
-	specs = render.TextureSpecs{
-		Texture:  texture,
-		Position: position,
-		Size: math.Vector2{
-			X: int(surface.W),
-			Y: int(surface.H),
+	copy = render.CopySpecs{
+		Texture: texture,
+		Rect: sdl.Rect{
+			X: int32(position.X),
+			Y: int32(position.Y),
+			W: int32(surface.W),
+			H: int32(surface.H),
 		},
 	}
 
-	render.RenderTexture(specs)
+	lifecycle.Register(lifecycle.GameObject{
+		Render: func() {
+			render.RenderCopy(copy)
+		},
+	})
+}
+
+func AlignText(anchor Anchor, screen math.Vector2) {
+	copy.Rect.X = int32(screen.X)/2 - (copy.Rect.W / 2)
 }
 
 func ClearFont() {
 	texture.Destroy()
 	surface.Free()
-	font.Close()
+	//font.Close() // TODO: This is causing a crash when closing the game
 }

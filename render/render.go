@@ -4,7 +4,6 @@ import (
 	"container/list"
 
 	"github.com/mikabrytu/gomes-engine/lifecycle"
-	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -17,10 +16,9 @@ type ScreenSpecs struct {
 	Height int32
 }
 
-type TextureSpecs struct {
-	Texture  *sdl.Texture
-	Position math.Vector2
-	Size     math.Vector2
+type CopySpecs struct {
+	Texture *sdl.Texture
+	Rect    sdl.Rect
 }
 
 var window *sdl.Window
@@ -53,14 +51,8 @@ func Render() {
 
 	if (renderCopies != nil) && (renderCopies.Len() > 0) {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
-			specs := e.Value.(TextureSpecs)
-			rect := sdl.Rect{
-				X: int32(specs.Position.X),
-				Y: int32(specs.Position.Y),
-				W: int32(specs.Size.X),
-				H: int32(specs.Size.Y),
-			}
-			renderer.Copy(specs.Texture, nil, &rect)
+			specs := e.Value.(CopySpecs)
+			renderer.Copy(specs.Texture, nil, &specs.Rect)
 		}
 	}
 
@@ -82,12 +74,18 @@ func DrawSimpleShapes(shape utils.RectSpecs, color Color) {
 	renderer.FillRect(&rect)
 }
 
-func RenderTexture(texture TextureSpecs) {
+func RenderCopy(copy CopySpecs) {
 	if renderCopies == nil {
 		renderCopies = list.New()
 	}
 
-	renderCopies.PushBack(texture)
+	for e := renderCopies.Front(); e != nil; e = e.Next() {
+		if e.Value.(CopySpecs) == copy {
+			return
+		}
+	}
+
+	renderCopies.PushBack(copy)
 }
 
 func GetRenderer() *sdl.Renderer {
@@ -95,6 +93,8 @@ func GetRenderer() *sdl.Renderer {
 }
 
 func Destroy() {
+	renderCopies = list.New()
+
 	defer window.Destroy()
 	defer renderer.Destroy()
 

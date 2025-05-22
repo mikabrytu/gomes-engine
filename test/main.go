@@ -102,12 +102,16 @@ func prepareText() {
 		Path: "test/assets/font/freesansbold.ttf",
 		Size: 24,
 	}
-
 	position := math.Vector2{X: 10, Y: 10}
 
-	ui.LoadFont(font)
-	ui.RenderText("Gong", render.Blue, position)
-	ui.AlignText(ui.TopCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
+	p1Score := ui.NewFont(font)
+	p1Score.RenderText("Playee 1", render.Blue, position)
+	p1Score.AlignText(ui.TopCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
+
+	position.Y = SCREEN_HEIGHT - 10
+	p2Score := ui.NewFont(font)
+	p2Score.RenderText("Player 2", render.Green, position)
+	p2Score.AlignText(ui.BottomCenter, math.Vector2{X: SCREEN_WIDTH, Y: SCREEN_HEIGHT})
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {

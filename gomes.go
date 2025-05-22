@@ -10,7 +10,6 @@ import (
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/physics"
 	"github.com/mikabrytu/gomes-engine/render"
-	"github.com/mikabrytu/gomes-engine/ui"
 	"github.com/veandco/go-sdl2/sdl" // This is just for the centered window position flag. Games will not read this
 )
 
@@ -32,7 +31,6 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 func Run() {
 	defer audio.StopSoundtrack(true)
 	defer audio.ClearBuffer()
-	defer ui.ClearFont()
 	defer dependencies.Quit()
 
 	lifecycle.Run()

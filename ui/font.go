@@ -28,20 +28,26 @@ const (
 	BottomCenter
 )
 
-var font *ttf.Font
-var surface *sdl.Surface
-var texture *sdl.Texture
-var copy render.CopySpecs
+type Font struct {
+	instance *ttf.Font
+	surface  *sdl.Surface
+	texture  *sdl.Texture
+	copy     render.CopySpecs
+}
 
-func LoadFont(specs FontSpecs) {
+func NewFont(specs FontSpecs) *Font {
+	font := &Font{}
+
 	var err error
-	font, err = ttf.OpenFont(specs.Path, specs.Size)
+	font.instance, err = ttf.OpenFont(specs.Path, specs.Size)
 	if err != nil {
 		panic(err)
 	}
+
+	return font
 }
 
-func RenderText(text string, color render.Color, position math.Vector2) {
+func (f *Font) RenderText(text string, color render.Color, position math.Vector2) {
 	var err error
 	csdl := sdl.Color{
 		R: color.R,
@@ -50,39 +56,42 @@ func RenderText(text string, color render.Color, position math.Vector2) {
 		A: color.A,
 	}
 
-	surface, err = font.RenderUTF8Blended(text, csdl)
+	f.surface, err = f.instance.RenderUTF8Blended(text, csdl)
 	if err != nil {
 		panic(err)
 	}
 
-	texture, err = render.GetRenderer().CreateTextureFromSurface(surface)
+	f.texture, err = render.GetRenderer().CreateTextureFromSurface(f.surface)
 	if err != nil {
 		panic(err)
 	}
 
-	copy = render.CopySpecs{
-		Texture: texture,
+	f.copy = render.CopySpecs{
+		Texture: f.texture,
 		Rect: sdl.Rect{
 			X: int32(position.X),
 			Y: int32(position.Y),
-			W: int32(surface.W),
-			H: int32(surface.H),
+			W: int32(f.surface.W),
+			H: int32(f.surface.H),
 		},
 	}
 
 	lifecycle.Register(lifecycle.GameObject{
 		Render: func() {
-			render.RenderCopy(copy)
+			render.RenderCopy(f.copy)
+		},
+		Destroy: func() {
+			f.ClearFont()
 		},
 	})
 }
 
-func AlignText(anchor Anchor, screen math.Vector2) {
-	copy.Rect.X = int32(screen.X)/2 - (copy.Rect.W / 2)
+func (f *Font) AlignText(anchor Anchor, screen math.Vector2) {
+	f.copy.Rect.X = int32(screen.X)/2 - (f.copy.Rect.W / 2)
 }
 
-func ClearFont() {
-	texture.Destroy()
-	surface.Free()
+func (f *Font) ClearFont() {
+	f.texture.Destroy()
+	f.surface.Free()
 	//font.Close() // TODO: This is causing a crash when closing the game
 }

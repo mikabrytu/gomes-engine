@@ -32,13 +32,20 @@ type Font struct {
 	instance *ttf.Font
 	surface  *sdl.Surface
 	texture  *sdl.Texture
+	text     string
+	position math.Vector2
 	copy     render.CopySpecs
+	color    render.Color
 	screen   math.Vector2
+	update   bool
 }
+
+// Public API
 
 func NewFont(specs FontSpecs, screenSize math.Vector2) *Font {
 	font := &Font{
 		screen: screenSize,
+		update: false,
 	}
 
 	var err error
@@ -50,16 +57,85 @@ func NewFont(specs FontSpecs, screenSize math.Vector2) *Font {
 	return font
 }
 
-func (f *Font) RenderText(text string, color render.Color, position math.Vector2) {
-	var err error
-	csdl := sdl.Color{
-		R: color.R,
-		G: color.G,
-		B: color.B,
-		A: color.A,
+func (f *Font) Init(text string, color render.Color, position math.Vector2) {
+	f.text = text
+	f.color = color
+	f.position = position
+	f.prepareRender()
+
+	lifecycle.Register(lifecycle.GameObject{
+		Update: func() {
+			if f.update {
+				f.update = false
+				f.texture.Destroy()
+				f.surface.Free()
+				f.prepareRender()
+			}
+		},
+		Render: func() {
+			render.RenderCopy(f.copy)
+		},
+		Destroy: func() {
+			f.ClearFont()
+		},
+	})
+}
+
+func (f *Font) UpdateText(text string) {
+	f.text = text
+	f.update = true
+}
+
+func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
+	switch anchor {
+	case TopLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case TopCenter:
+		f.copy.Rect.X = ((int32(f.screen.X) / 2) - (f.surface.W / 2)) + int32(offset.X)
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case TopRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = int32(0 + offset.Y)
+	case MiddleLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = ((int32(f.screen.Y) / 2) - (f.surface.H / 2)) + int32(offset.Y)
+	case MiddleCenter:
+		f.copy.Rect.X = ((int32(f.screen.X) / 2) - (f.surface.W / 2)) + int32(offset.X)
+		f.copy.Rect.Y = ((int32(f.screen.Y) / 2) - (f.surface.H / 2)) + int32(offset.Y)
+	case MiddleRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = ((int32(f.screen.Y) / 2) - (f.surface.H / 2)) + int32(offset.Y)
+	case BottomLeft:
+		f.copy.Rect.X = int32(0 + offset.X)
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
+	case BottomCenter:
+		f.copy.Rect.X = ((int32(f.screen.X) / 2) - (f.surface.W / 2)) + int32(offset.X)
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
+	case BottomRight:
+		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
+		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
 	}
 
-	f.surface, err = f.instance.RenderUTF8Blended(text, csdl)
+	f.position = math.Vector2{
+		X: int(f.copy.Rect.X),
+		Y: int(f.copy.Rect.Y),
+	}
+}
+
+func (f *Font) ClearFont() {
+	f.texture.Destroy()
+	f.surface.Free()
+	//font.Close() // TODO: This is causing a crash when closing the game
+}
+
+// Private Implementation
+
+func (f *Font) prepareRender() {
+	var err error
+	csdl := colorToSDL(f.color)
+
+	f.surface, err = f.instance.RenderUTF8Blended(f.text, csdl)
 	if err != nil {
 		panic(err)
 	}
@@ -72,63 +148,19 @@ func (f *Font) RenderText(text string, color render.Color, position math.Vector2
 	f.copy = render.CopySpecs{
 		Texture: f.texture,
 		Rect: sdl.Rect{
-			X: int32(position.X),
-			Y: int32(position.Y),
+			X: int32(f.position.X),
+			Y: int32(f.position.Y),
 			W: int32(f.surface.W),
 			H: int32(f.surface.H),
 		},
 	}
-
-	lifecycle.Register(lifecycle.GameObject{
-		Render: func() {
-			render.RenderCopy(f.copy)
-		},
-		Destroy: func() {
-			f.ClearFont()
-		},
-	})
 }
 
-func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
-	switch anchor {
-	case TopLeft:
-		f.copy.Rect.X = int32(0 + offset.X)
-		f.copy.Rect.Y = int32(0 + offset.Y)
-	case TopCenter:
-		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
-		f.copy.Rect.Y = int32(0 + offset.Y)
-	case TopRight:
-		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
-		f.copy.Rect.Y = int32(0 + offset.Y)
-	case MiddleLeft:
-		f.copy.Rect.X = int32(0 + offset.X)
-		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
-		break
-	case MiddleCenter:
-		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
-		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
-		break
-	case MiddleRight:
-		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
-		f.copy.Rect.Y = (int32(f.screen.Y) / 2) - (f.surface.H / 2)
-		break
-	case BottomLeft:
-		f.copy.Rect.X = int32(0 + offset.X)
-		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
-		break
-	case BottomCenter:
-		f.copy.Rect.X = (int32(f.screen.X) / 2) - (f.surface.W / 2)
-		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
-		break
-	case BottomRight:
-		f.copy.Rect.X = int32(f.screen.X) - (f.surface.W + int32(offset.X))
-		f.copy.Rect.Y = int32(f.screen.Y) - (f.surface.H + int32(offset.Y))
-		break
+func colorToSDL(color render.Color) sdl.Color {
+	return sdl.Color{
+		R: color.R,
+		G: color.G,
+		B: color.B,
+		A: color.A,
 	}
-}
-
-func (f *Font) ClearFont() {
-	f.texture.Destroy()
-	f.surface.Free()
-	//font.Close() // TODO: This is causing a crash when closing the game
 }

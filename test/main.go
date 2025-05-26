@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
+	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/physics"
@@ -105,16 +106,27 @@ func prepareText() {
 		Size: 24,
 	}
 	position := math.Vector2{X: 10, Y: 10}
-	offset := math.Vector2{X: 10, Y: 10}
+	offset := math.Vector2{X: -64, Y: 10}
 
 	p1Score := ui.NewFont(font, SCREEN_SIZE)
-	p1Score.RenderText("Player 1", render.White, position)
-	p1Score.AlignText(ui.TopLeft, offset)
+	p1Score.Init("Player 1", render.White, position)
+	p1Score.AlignText(ui.BottomCenter, offset)
 
 	position.Y = SCREEN_SIZE.Y - 10
 	p2Score := ui.NewFont(font, SCREEN_SIZE)
-	p2Score.RenderText("Player 2", render.White, position)
-	p2Score.AlignText(ui.TopRight, offset)
+	p2Score.Init("Player 2", render.White, position)
+	p2Score.AlignText(ui.TopCenter, offset)
+
+	count := 0
+	events.Subscribe(events.INPUT_MOUSE_CLICK, func(params ...any) error {
+		count++
+		text := "Player " + fmt.Sprint(count)
+		p1Score.UpdateText(text)
+
+		fmt.Printf("Updated Count: %v\n", count)
+
+		return nil
+	})
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {

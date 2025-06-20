@@ -3,6 +3,7 @@ package lifecycle
 import (
 	"container/list"
 	"fmt"
+	"time"
 
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -30,6 +31,7 @@ func Init() {
 	renderLayer = GameObject{}
 	idCounter = 0
 	running = true
+	smoothing = 0.5
 }
 
 func Register(o GameObject) GameObject {
@@ -115,6 +117,13 @@ func Run() {
 	}
 
 	for running {
+		now := time.Now()
+		delta := now.Sub(prevTime).Seconds()
+		prevTime = now
+
+		current := 1 / delta
+		fps = fps*smoothing + current*(1-smoothing)
+
 		if inputLayer.Update != nil {
 			inputLayer.Update()
 		}
@@ -144,7 +153,7 @@ func Run() {
 			renderLayer.Update()
 		}
 
-		sdl.Delay(33)
+		sdl.Delay(15)
 	}
 }
 

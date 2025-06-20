@@ -144,7 +144,7 @@ func Run() {
 			renderLayer.Update()
 		}
 
-		sdl.Delay(33)
+		sdl.Delay(15)
 	}
 }
 

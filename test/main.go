@@ -21,6 +21,7 @@ var SCREEN_SIZE = math.Vector2{
 func main() {
 	gomesengine.HiGomes()
 	gomesengine.Init("Gong", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
+	lifecycle.SetSmoothStep(0.9)
 
 	gong()
 
@@ -95,6 +96,9 @@ func prepareBall(pw int) {
 		},
 		Render: func() {
 			render.DrawSimpleShapes(ball, render.White)
+
+			fps := lifecycle.ShowFPS()
+			fmt.Printf("FPS: %v\n", int(fps))
 		},
 	})
 }

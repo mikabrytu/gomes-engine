@@ -120,7 +120,7 @@ func CheckCollision(collider *RigidBody) RigidBody {
 	return result
 }
 
-func ResolveDynamicCollisions(body *RigidBody) {
+func ResolveDynamicCollisions(body *RigidBody, horizontal, vertical bool) {
 	if !body.IsDynamic {
 		fmt.Printf("Body %v is not set to Dynamic resolution.\n", body.Name)
 		return
@@ -132,19 +132,36 @@ func ResolveDynamicCollisions(body *RigidBody) {
 		return
 	}
 
-	if collision.Rect.PosX < body.Rect.PosX {
+	bMid := math.Vector2{
+		X: body.Rect.PosX + (body.Rect.Width / 2),
+		Y: body.Rect.PosY + (body.Rect.Height / 2),
+	}
+	cMid := math.Vector2{
+		X: collision.Rect.PosX + (collision.Rect.Width / 2),
+		Y: collision.Rect.PosY + (collision.Rect.Height / 2),
+	}
+
+	if horizontal && cMid.X == bMid.X {
+		body.Axis.X = 0
+	}
+
+	if vertical && cMid.Y == bMid.Y {
+		body.Axis.Y = 0
+	}
+
+	if cMid.X < bMid.X {
 		body.Axis.X = 1
 	}
 
-	if collision.Rect.PosX > body.Rect.PosX {
+	if cMid.X > bMid.X {
 		body.Axis.X = -1
 	}
 
-	if collision.Rect.PosY < body.Rect.PosY {
+	if cMid.Y < bMid.Y {
 		body.Axis.Y = 1
 	}
 
-	if collision.Rect.PosY > body.Rect.PosY {
+	if cMid.Y > bMid.Y {
 		body.Axis.Y = -1
 	}
 }

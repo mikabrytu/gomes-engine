@@ -35,6 +35,26 @@ func RegisterBody(b *utils.RectSpecs, name string) RigidBody {
 	return body
 }
 
+func RemoveBody(body *RigidBody) {
+	var next *list.Element
+	found := false
+
+	for e := bodies.Front(); e != nil; e = next {
+		next = e.Next()
+		item := RigidBody(e.Value.(RigidBody))
+
+		if body.Name == item.Name {
+			bodies.Remove(e)
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		println("Body not found")
+	}
+}
+
 func GetBodies() *list.List {
 	return bodies
 }

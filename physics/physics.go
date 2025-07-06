@@ -4,12 +4,15 @@ import (
 	"container/list"
 	"fmt"
 
+	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/utils"
 )
 
 type RigidBody struct {
-	Name string
-	Rect *utils.RectSpecs
+	Name      string
+	Rect      *utils.RectSpecs
+	Axis      math.Vector2
+	IsDynamic bool
 }
 
 var bodies *list.List
@@ -18,13 +21,18 @@ func Init() {
 	bodies = list.New()
 }
 
-func RegisterBody(b *utils.RectSpecs, name string) {
-	bodies.PushFront(RigidBody{
-		Name: name,
-		Rect: b,
-	})
+func RegisterBody(b *utils.RectSpecs, name string) RigidBody {
+	body := RigidBody{
+		Name:      name,
+		Rect:      b,
+		Axis:      math.Vector2{X: 0, Y: 0},
+		IsDynamic: false,
+	}
 
+	bodies.PushFront(body)
 	fmt.Printf("Registered body: %s\n", name)
+
+	return body
 }
 
 func GetBodies() *list.List {
@@ -67,7 +75,15 @@ func GetBodyByRect(rect *utils.RectSpecs) RigidBody {
 	}
 }
 
-func CheckCollision(collider RigidBody) RigidBody {
+func EnableDynamicCollision(body *RigidBody) {
+	body.IsDynamic = true
+}
+
+func DisableDynamicCollision(body *RigidBody) {
+	body.IsDynamic = false
+}
+
+func CheckCollision(collider *RigidBody) RigidBody {
 	if (bodies == nil) || (bodies.Len() == 0) {
 		panic("No bodies registered")
 	}
@@ -79,7 +95,8 @@ func CheckCollision(collider RigidBody) RigidBody {
 	for e := bodies.Front(); e != nil; e = e.Next() {
 		target := e.Value.(RigidBody)
 
-		if target.Name == collider.Name { // Change to pointer check
+		// TODO: Change to pointer check
+		if target.Name == collider.Name {
 			continue
 		}
 
@@ -101,4 +118,33 @@ func CheckCollision(collider RigidBody) RigidBody {
 	}
 
 	return result
+}
+
+func ResolveDynamicCollisions(body *RigidBody) {
+	if !body.IsDynamic {
+		fmt.Printf("Body %v is not set to Dynamic resolution.\n", body.Name)
+		return
+	}
+
+	collision := CheckCollision(body)
+
+	if collision.Name == "nil" {
+		return
+	}
+
+	if collision.Rect.PosX < body.Rect.PosX {
+		body.Axis.X = 1
+	}
+
+	if collision.Rect.PosX > body.Rect.PosX {
+		body.Axis.X = -1
+	}
+
+	if collision.Rect.PosY < body.Rect.PosY {
+		body.Axis.Y = 1
+	}
+
+	if collision.Rect.PosY > body.Rect.PosY {
+		body.Axis.Y = -1
+	}
 }

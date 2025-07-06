@@ -56,11 +56,11 @@ func preparePallets(off, pw, ph int) {
 func prepareBall(pw int) {
 	ball := utils.RectSpecs{
 		PosX:   (SCREEN_SIZE.X / 2) - (pw / 2),
-		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2) + 1,
+		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2),
 		Width:  pw,
 		Height: pw,
 	}
-	var speed int = 5
+	var speed int = 10
 	var body physics.RigidBody
 
 	lifecycle.Register(lifecycle.GameObject{
@@ -73,7 +73,7 @@ func prepareBall(pw int) {
 			ball.PosX += speed * body.Axis.X
 			ball.PosY += speed * body.Axis.Y
 
-			physics.ResolveDynamicCollisions(&body, false, false)
+			physics.ResolveDynamicCollisions(&body, true, true)
 
 			if body.Rect.PosY < 0 {
 				body.Axis.Y = 1
@@ -124,9 +124,10 @@ func prepareText() {
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {
 	var body physics.RigidBody
+	var instance lifecycle.GameObject
 	speed := 5
 
-	lifecycle.Register(lifecycle.GameObject{
+	instance = lifecycle.Register(lifecycle.GameObject{
 		Start: func() {
 			body = physics.RegisterBody(&rect, name)
 
@@ -152,9 +153,17 @@ func drawPallets(rect utils.RectSpecs, color render.Color, name string) {
 		},
 		Physics: func() {
 			body.Rect.PosY += body.Axis.Y * speed
+
+			collision := physics.CheckCollision(&body)
+			if collision.Name != "nil" {
+				lifecycle.Stop(instance)
+			}
 		},
 		Render: func() {
 			render.DrawSimpleShapes(rect, color)
+		},
+		Destroy: func() {
+			physics.RemoveBody(&body)
 		},
 	})
 }

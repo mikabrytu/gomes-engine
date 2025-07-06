@@ -18,13 +18,16 @@ func Init() {
 	bodies = list.New()
 }
 
-func RegisterBody(b *utils.RectSpecs, name string) {
-	bodies.PushFront(RigidBody{
+func RegisterBody(b *utils.RectSpecs, name string) RigidBody {
+	body := RigidBody{
 		Name: name,
 		Rect: b,
-	})
+	}
 
+	bodies.PushFront(body)
 	fmt.Printf("Registered body: %s\n", name)
+
+	return body
 }
 
 func GetBodies() *list.List {

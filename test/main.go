@@ -70,7 +70,7 @@ func prepareBall(pw int) {
 			body := physics.GetBodyByName("ball")
 
 			if body.Name != "nil" {
-				collider := physics.CheckCollision(body)
+				collider := physics.CheckCollision(&body)
 				if collider.Name != "nil" {
 					if collider.Rect.PosX > ball.PosX {
 						direction = -1

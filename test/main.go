@@ -47,6 +47,7 @@ func preparePallets(off, pw, ph int) {
 	}
 	palletRight := palletLeft
 	palletRight.PosX = (SCREEN_SIZE.X - (pw + off))
+	//palletRight.PosY -= 50
 
 	drawPallets(palletLeft, render.White, "palletLeft")
 	drawPallets(palletRight, render.White, "palletRight")
@@ -55,50 +56,38 @@ func preparePallets(off, pw, ph int) {
 func prepareBall(pw int) {
 	ball := utils.RectSpecs{
 		PosX:   (SCREEN_SIZE.X / 2) - (pw / 2),
-		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2),
+		PosY:   (SCREEN_SIZE.Y / 2) - (pw / 2) + 1,
 		Width:  pw,
 		Height: pw,
 	}
-	var direction int = -1
 	var speed int = 5
+	var body physics.RigidBody
 
 	lifecycle.Register(lifecycle.GameObject{
 		Start: func() {
-			physics.RegisterBody(&ball, "ball")
+			body = physics.RegisterBody(&ball, "ball")
+			body.Axis.X = 1
+			physics.EnableDynamicCollision(&body)
 		},
 		Physics: func() {
-			body := physics.GetBodyByName("ball")
+			ball.PosX += speed * body.Axis.X
+			ball.PosY += speed * body.Axis.Y
 
-			if body.Name != "nil" {
-				collider := physics.CheckCollision(&body)
-				if collider.Name != "nil" {
-					if collider.Rect.PosX > ball.PosX {
-						direction = -1
-					}
+			physics.ResolveDynamicCollisions(&body, false, false)
 
-					if collider.Rect.PosX < ball.PosX {
-						direction = 1
-					}
-				}
-			} else {
-				fmt.Printf("Ball is not a rigidbody")
+			if body.Rect.PosY < 0 {
+				body.Axis.Y = 1
 			}
 
-			// Continue movement until end of screen
-			if (ball.PosX + ball.Width) > SCREEN_SIZE.X {
-				direction = -1
+			if (body.Rect.PosY + body.Rect.Height) > SCREEN_SIZE.Y {
+				body.Axis.Y = -1
 			}
-			if ball.PosX < 0 {
-				direction = 1
-			}
-
-			ball.PosX += speed * direction
 		},
 		Render: func() {
 			render.DrawSimpleShapes(ball, render.White)
 
-			fps := lifecycle.ShowFPS()
-			fmt.Printf("FPS: %v\n", int(fps))
+			// fps := lifecycle.ShowFPS()
+			// fmt.Printf("FPS: %v\n", int(fps))
 		},
 	})
 }
@@ -134,9 +123,35 @@ func prepareText() {
 }
 
 func drawPallets(rect utils.RectSpecs, color render.Color, name string) {
+	var body physics.RigidBody
+	speed := 5
+
 	lifecycle.Register(lifecycle.GameObject{
 		Start: func() {
-			physics.RegisterBody(&rect, name)
+			body = physics.RegisterBody(&rect, name)
+
+			events.Subscribe(events.INPUT_KEYBOARD_PRESSED_W, func(params ...any) error {
+				body.Axis.Y = -1
+				return nil
+			})
+
+			events.Subscribe(events.INPUT_KEYBOARD_PRESSED_S, func(params ...any) error {
+				body.Axis.Y = 1
+				return nil
+			})
+
+			events.Subscribe(events.INPUT_KEYBOARD_RELEASED_W, func(params ...any) error {
+				body.Axis.Y = 0
+				return nil
+			})
+
+			events.Subscribe(events.INPUT_KEYBOARD_RELEASED_S, func(params ...any) error {
+				body.Axis.Y = 0
+				return nil
+			})
+		},
+		Physics: func() {
+			body.Rect.PosY += body.Axis.Y * speed
 		},
 		Render: func() {
 			render.DrawSimpleShapes(rect, color)

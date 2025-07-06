@@ -58,7 +58,10 @@ func Stop(o GameObject) {
 		item := GameObject(e.Value.(GameObject))
 
 		if o.Id == item.Id {
-			item.Destroy()
+			if item.Destroy != nil {
+				item.Destroy()
+			}
+
 			objects.Remove(e)
 			break
 		}
@@ -156,8 +159,6 @@ func Run() {
 		sdl.Delay(15)
 	}
 }
-
-// Private Implementation
 
 func registerSpecial(o GameObject, message string) GameObject {
 	if isGameObjectNil(o) {

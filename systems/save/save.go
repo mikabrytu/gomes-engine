@@ -2,18 +2,26 @@ package savesystem
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"os"
 )
 
-func Save(data any) {
+func Save(data any, path string) {
+	file, err := os.Create(path)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
 	json, err := json.Marshal(data)
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("json data: %s\n", json)
+	_, err = file.Write(json)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func Load(path string, out any) error {

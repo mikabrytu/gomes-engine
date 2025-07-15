@@ -1,7 +1,7 @@
 package main
 
 import (
-	"container/list"
+	"fmt"
 	"time"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
@@ -22,8 +22,8 @@ func main() {
 
 	lifecycle.SetSmoothStep(0.9)
 
-	save()
-	load()
+	//save()
+	//load()
 
 	gomesengine.Run()
 }
@@ -33,48 +33,25 @@ type Score struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 
-type Users struct {
-	Users []User `json:"users"`
-}
-
-type User struct {
-	Name   string `json:"name"`
-	Type   string `json:"type"`
-	Age    int    `json:"age"`
-	Social Social `json:"social"`
-}
-
-type Social struct {
-	Facebook string `json:"facebook"`
-	Twitter  string `json:"twitter"`
-}
-
 func save() {
+	path := "test/assets/json/highscore.json"
 	timestamp := time.Now()
 	data := Score{
-		Score:     100,
+		Score:     200,
 		Timestamp: timestamp,
 	}
 
-	savesystem.Save(data)
+	savesystem.Save(data, path)
 }
 
 func load() {
-	var users Users
-	path := "test/assets/json/users.json"
-	err := savesystem.Load(path, &users)
+	var score Score
+	path := "test/assets/json/highscore.json"
+	err := savesystem.Load(path, &score)
 
 	if err != nil {
 		panic(err)
 	}
 
-	names := list.New()
-	for i := 0; i < len(users.Users); i++ {
-		names.PushBack(users.Users[i].Name)
-	}
-
-	for e := names.Front(); e != nil; e = e.Next() {
-		name := e.Value.(string)
-		println(name)
-	}
+	fmt.Printf("Score of %v saved at %v", score.Score, score.Timestamp)
 }

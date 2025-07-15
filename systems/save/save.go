@@ -1,29 +1,29 @@
 package savesystem
 
 import (
-	"container/list"
+	"encoding/json"
+	"io"
 	"os"
 )
-
-var root string
-var files *list.List
-
-func Init(path string) {
-	root = path
-	files = list.New()
-}
 
 func Save() {
 
 }
 
-func Load(path string) {
+func Load(path string) map[string]interface{} {
 	file, err := os.Open(path)
 	if err != nil {
 		panic(err)
 	}
-
-	println("File opened!")
-
 	defer file.Close()
+
+	byteValue, err := io.ReadAll(file)
+	if err != nil {
+		panic(err)
+	}
+
+	var result map[string]interface{}
+	json.Unmarshal([]byte(byteValue), &result)
+
+	return result
 }

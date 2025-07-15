@@ -51,7 +51,7 @@ func Render() {
 
 	if (renderCopies != nil) && (renderCopies.Len() > 0) {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
-			specs := e.Value.(CopySpecs)
+			specs := e.Value.(*CopySpecs)
 			renderer.Copy(specs.Texture, nil, &specs.Rect)
 		}
 	}
@@ -74,13 +74,13 @@ func DrawSimpleShapes(shape utils.RectSpecs, color Color) {
 	renderer.FillRect(&rect)
 }
 
-func RenderCopy(copy CopySpecs) {
+func RenderCopy(copy *CopySpecs) {
 	if renderCopies == nil {
 		renderCopies = list.New()
 	}
 
 	for e := renderCopies.Front(); e != nil; e = e.Next() {
-		if e.Value.(CopySpecs) == copy {
+		if e.Value.(*CopySpecs) == copy {
 			return
 		}
 	}

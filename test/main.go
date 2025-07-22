@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	gomesengine "github.com/mikabrytu/gomes-engine"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/render"
 	savesystem "github.com/mikabrytu/gomes-engine/systems/save"
+	"github.com/mikabrytu/gomes-engine/ui"
 	"github.com/mikabrytu/gomes-engine/utils"
 
 	"github.com/mikabrytu/gomes-engine/lifecycle"
@@ -36,6 +38,19 @@ type Score struct {
 }
 
 func instantiate() {
+	specs := ui.FontSpecs{
+		Name: "Temp",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 24,
+	}
+	fPos := math.Vector2{X: 0, Y: 16}
+
+	font := ui.NewFont(specs, SCREEN_SIZE)
+	font.Init("Test", render.White, fPos)
+	font.AlignText(ui.TopCenter, fPos)
+
+	fColors := []render.Color{render.Red, render.Green, render.Blue}
+
 	events.Subscribe(events.INPUT_MOUSE_CLICK_DOWN, func(params ...any) error {
 		pos := math.Vector2{
 			X: params[0].([]any)[0].([]any)[0].(int),
@@ -59,6 +74,9 @@ func instantiate() {
 				render.DrawSimpleShapes(rect, render.White)
 			},
 		})
+
+		c := fColors[rand.Intn(len(fColors))]
+		font.UpdateColor(c)
 
 		return nil
 	})

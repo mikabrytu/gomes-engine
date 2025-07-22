@@ -3,6 +3,7 @@ package main
 import (
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
+	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/render"
@@ -37,7 +38,16 @@ func draw() {
 
 	lifecycle.Register(&lifecycle.GameObject{
 		Start: func() {
-			sprite.Register()
+			events.Subscribe(events.INPUT_MOUSE_CLICK, func(params ...any) error {
+				sprite.UpdateImage("test/assets/img/alien2.jpg")
+				return nil
+			})
+		},
+		Update: func() {
+			rect := sprite.GetRect()
+			rect.PosX += 1
+
+			sprite.UpdateRect(rect)
 		},
 		Destroy: func() {
 			sprite.ClearSprite()

@@ -16,6 +16,7 @@ type GameObject struct {
 	Render  func()
 	Destroy func()
 	started bool
+	skip    bool
 }
 
 var idCounter = 0
@@ -38,6 +39,7 @@ func Init() {
 func Register(o *GameObject) *GameObject {
 	o.Id = idCounter
 	o.started = false
+	o.skip = false
 	idCounter++
 
 	_ = objects.PushFront(o)
@@ -96,6 +98,14 @@ func StopRender() {
 	renderLayer = GameObject{}
 }
 
+func Enable(o *GameObject) {
+	skip(o, false)
+}
+
+func Disable(o *GameObject) {
+	skip(o, true)
+}
+
 func Kill() {
 	objects.Init()
 	inputLayer = GameObject{}
@@ -103,23 +113,27 @@ func Kill() {
 	running = false
 }
 
+func GetTotalObjects() int {
+	return objects.Len()
+}
+
 func Run() {
 	for running {
 		/* Start() */
-		if inputLayer.Start != nil && !inputLayer.started {
+		if inputLayer.Start != nil && !inputLayer.started && !inputLayer.skip {
 			inputLayer.Start()
 			inputLayer.started = true
 		}
 
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Start != nil && !item.started {
+			if item.Start != nil && !item.started && !item.skip {
 				item.Start()
 				item.started = true
 			}
 		}
 
-		if renderLayer.Start != nil && !renderLayer.started {
+		if renderLayer.Start != nil && !renderLayer.started && !inputLayer.skip {
 			renderLayer.Start()
 			renderLayer.started = true
 		}
@@ -141,7 +155,7 @@ func Run() {
 
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Update != nil {
+			if item.Update != nil && !item.skip {
 				item.Update()
 			}
 		}
@@ -150,7 +164,7 @@ func Run() {
 		/* Physics() */
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Physics != nil {
+			if item.Physics != nil && !item.skip {
 				item.Physics()
 			}
 		}
@@ -159,7 +173,7 @@ func Run() {
 		/* Render() */
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Render != nil {
+			if item.Render != nil && !item.skip {
 				item.Render()
 			}
 		}
@@ -184,4 +198,20 @@ func registerSpecial(o GameObject, message string) GameObject {
 
 func isGameObjectNil(o GameObject) bool {
 	return o.Start == nil && o.Update == nil && o.Destroy == nil
+}
+
+func skip(o *GameObject, skip bool) {
+	found := false
+	for e := objects.Front(); e != nil; e = e.Next() {
+		item := e.Value.(*GameObject)
+		if item == o {
+			item.skip = skip
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		panic("GameObject not registered")
+	}
 }

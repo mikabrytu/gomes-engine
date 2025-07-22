@@ -27,7 +27,7 @@ func main() {
 
 	lifecycle.SetSmoothStep(0.9)
 
-	instantiate()
+	skip()
 
 	gomesengine.Run()
 }
@@ -35,6 +35,35 @@ func main() {
 type Score struct {
 	Score     int       `json:"score"`
 	Timestamp time.Time `json:"timestamp"`
+}
+
+func skip() {
+	rect := utils.RectSpecs{
+		PosX:   (SCREEN_SIZE.X / 2) - 50,
+		PosY:   (SCREEN_SIZE.Y / 2) - 50,
+		Width:  100,
+		Height: 100,
+	}
+
+	var box *lifecycle.GameObject
+	box = lifecycle.Register(&lifecycle.GameObject{
+		Start: func() {
+			events.Subscribe(events.INPUT_MOUSE_CLICK_DOWN, func(params ...any) error {
+				lifecycle.Disable(box)
+				fmt.Printf("Total Objects Registered: %v\n", lifecycle.GetTotalObjects())
+				return nil
+			})
+
+			events.Subscribe(events.INPUT_MOUSE_CLICK_UP, func(params ...any) error {
+				lifecycle.Enable(box)
+				fmt.Printf("Total Objects Registered: %v\n", lifecycle.GetTotalObjects())
+				return nil
+			})
+		},
+		Render: func() {
+			render.DrawSimpleShapes(rect, render.White)
+		},
+	})
 }
 
 func instantiate() {

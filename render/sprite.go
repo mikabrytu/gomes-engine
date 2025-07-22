@@ -11,6 +11,7 @@ type Sprite struct {
 	path    string
 	texture *sdl.Texture
 	copy    CopySpecs
+	rect    utils.RectSpecs
 }
 
 func NewSprite(name string, path string) *Sprite {
@@ -23,27 +24,48 @@ func NewSprite(name string, path string) *Sprite {
 }
 
 func (s *Sprite) Init(specs utils.RectSpecs) {
+	s.rect = specs
+
+	s.newTexture()
+	s.newRect()
+
+	AddToRenderer(&s.copy)
+}
+
+func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
+	s.rect = rect
+	s.newRect()
+}
+
+func (s *Sprite) UpdateImage(path string) {
+	s.path = path
+	s.newTexture()
+}
+
+func (s *Sprite) GetRect() utils.RectSpecs {
+	return s.rect
+}
+
+func (s *Sprite) ClearSprite() {
+	s.texture.Destroy()
+}
+
+func (s *Sprite) newTexture() {
 	var err error
 	s.texture, err = img.LoadTexture(renderer, s.path)
 	if err != nil {
 		panic(err)
 	}
+}
 
+func (s *Sprite) newRect() {
 	s.copy = CopySpecs{
 		Texture: s.texture,
 		Rect: sdl.Rect{
-			X: int32(specs.PosX),
-			Y: int32(specs.PosY),
-			W: int32(specs.Width),
-			H: int32(specs.Height),
+			X: int32(s.rect.PosX),
+			Y: int32(s.rect.PosY),
+			W: int32(s.rect.Width),
+			H: int32(s.rect.Height),
 		},
 	}
-}
-
-func (s *Sprite) Register() {
-	AddToRenderer(&s.copy)
-}
-
-func (s *Sprite) ClearSprite() {
-	s.texture.Destroy()
 }

@@ -4,7 +4,6 @@ import (
 	"container/list"
 
 	"github.com/mikabrytu/gomes-engine/lifecycle"
-	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -49,6 +48,9 @@ func Render() {
 		}
 	}
 
+	renderer.Present()
+	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
+
 	if (renderCopies != nil) && (renderCopies.Len() > 0) {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
 			specs := e.Value.(*CopySpecs)
@@ -56,25 +58,10 @@ func Render() {
 		}
 	}
 
-	renderer.Present()
-	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
 	renderer.Clear()
 }
 
-func DrawSimpleShapes(shape utils.RectSpecs, color Color) {
-	rect := sdl.Rect{
-		X: int32(shape.PosX),
-		Y: int32(shape.PosY),
-		W: int32(shape.Width),
-		H: int32(shape.Height),
-	}
-
-	renderer.SetDrawColor(color.R, color.G, color.B, color.A)
-	renderer.DrawRect(&rect)
-	renderer.FillRect(&rect)
-}
-
-func RenderCopy(copy *CopySpecs) {
+func AddToRenderer(copy *CopySpecs) {
 	if renderCopies == nil {
 		renderCopies = list.New()
 	}

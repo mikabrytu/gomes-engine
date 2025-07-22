@@ -80,6 +80,16 @@ func instantiate() {
 
 		return nil
 	})
+
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_F, func(params ...any) error {
+		println("F")
+		return nil
+	})
+
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSING_F, func(params ...any) error {
+		println("Pressing F")
+		return nil
+	})
 }
 
 func save() {

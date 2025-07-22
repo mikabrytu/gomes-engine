@@ -40,8 +40,6 @@ type Font struct {
 	update   bool
 }
 
-// Public API
-
 func NewFont(specs FontSpecs, screenSize math.Vector2) *Font {
 	font := &Font{
 		screen: screenSize,
@@ -83,6 +81,11 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 
 func (f *Font) UpdateText(text string) {
 	f.text = text
+	f.update = true
+}
+
+func (f *Font) UpdateColor(color render.Color) {
+	f.color = color
 	f.update = true
 }
 
@@ -128,8 +131,6 @@ func (f *Font) ClearFont() {
 	f.surface.Free()
 	//font.Close() // TODO: This is causing a crash when closing the game
 }
-
-// Private Implementation
 
 func (f *Font) prepareRender() {
 	var err error

@@ -48,9 +48,7 @@ func Render() {
 		}
 	}
 
-	renderer.Present()
-	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
-
+	// The copies should render before the present/clear section, otherwise it won't render.
 	if (renderCopies != nil) && (renderCopies.Len() > 0) {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
 			specs := e.Value.(*CopySpecs)
@@ -58,6 +56,8 @@ func Render() {
 		}
 	}
 
+	renderer.Present()
+	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
 	renderer.Clear()
 }
 

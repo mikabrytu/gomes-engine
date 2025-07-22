@@ -71,7 +71,7 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 			}
 		},
 		Render: func() {
-			render.RenderCopy(&f.copy)
+			render.AddToRenderer(&f.copy)
 		},
 		Destroy: func() {
 			f.ClearFont()

@@ -1,6 +1,7 @@
 package dependencies
 
 import (
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/mix"
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/veandco/go-sdl2/ttf"
@@ -19,6 +20,10 @@ func Init() {
 		panic(err)
 	}
 
+	if err := img.Init(img.INIT_PNG); err != nil {
+		panic(err)
+	}
+
 	if err := mix.OpenAudio(
 		mix.DEFAULT_FREQUENCY,
 		mix.DEFAULT_FORMAT,
@@ -30,6 +35,7 @@ func Init() {
 }
 
 func Quit() {
+	img.Quit()
 	ttf.Quit()
 	mix.CloseAudio()
 	mix.Quit()

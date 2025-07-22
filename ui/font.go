@@ -63,7 +63,7 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 	f.position = position
 	f.prepareRender()
 
-	lifecycle.Register(lifecycle.GameObject{
+	lifecycle.Register(&lifecycle.GameObject{
 		Update: func() {
 			if f.update {
 				f.update = false
@@ -73,7 +73,7 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 			}
 		},
 		Render: func() {
-			render.RenderCopy(f.copy)
+			render.RenderCopy(&f.copy)
 		},
 		Destroy: func() {
 			f.ClearFont()

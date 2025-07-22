@@ -15,6 +15,7 @@ type GameObject struct {
 	Physics func()
 	Render  func()
 	Destroy func()
+	started bool
 }
 
 var idCounter = 0
@@ -34,8 +35,9 @@ func Init() {
 	smoothing = 0.5
 }
 
-func Register(o GameObject) GameObject {
+func Register(o *GameObject) *GameObject {
 	o.Id = idCounter
+	o.started = false
 	idCounter++
 
 	_ = objects.PushFront(o)
@@ -51,14 +53,17 @@ func RegisterRender(o GameObject) {
 	renderLayer = registerSpecial(o, "Last")
 }
 
-func Stop(o GameObject) {
+func Stop(o *GameObject) {
 	var next *list.Element
 	for e := objects.Front(); e != nil; e = next {
 		next = e.Next()
-		item := GameObject(e.Value.(GameObject))
+		item := e.Value.(*GameObject)
 
 		if o.Id == item.Id {
-			item.Destroy()
+			if item.Destroy != nil {
+				item.Destroy()
+			}
+
 			objects.Remove(e)
 			break
 		}
@@ -71,11 +76,11 @@ func Stop(o GameObject) {
 }
 
 func StopById(id int) {
-	l := GameObject{Id: id}
-	Stop(l)
+	o := &GameObject{Id: id}
+	Stop(o)
 }
 
-func StopFirst() {
+func StopInput() {
 	if inputLayer.Destroy != nil {
 		inputLayer.Destroy()
 	}
@@ -83,7 +88,7 @@ func StopFirst() {
 	inputLayer = GameObject{}
 }
 
-func StopLast() {
+func StopRender() {
 	if renderLayer.Destroy != nil {
 		renderLayer.Destroy()
 	}
@@ -99,51 +104,61 @@ func Kill() {
 }
 
 func Run() {
-	if running {
-		if inputLayer.Start != nil {
+	for running {
+		/* Start() */
+		if inputLayer.Start != nil && !inputLayer.started {
 			inputLayer.Start()
+			inputLayer.started = true
 		}
 
 		for e := objects.Front(); e != nil; e = e.Next() {
-			item := GameObject(e.Value.(GameObject))
-			if item.Start != nil {
+			item := e.Value.(*GameObject)
+			if item.Start != nil && !item.started {
 				item.Start()
+				item.started = true
 			}
 		}
 
-		if renderLayer.Start != nil {
+		if renderLayer.Start != nil && !renderLayer.started {
 			renderLayer.Start()
+			renderLayer.started = true
 		}
-	}
+		/* Start() */
 
-	for running {
+		/* FPS Calculation */
 		now := time.Now()
 		delta := now.Sub(prevTime).Seconds()
 		prevTime = now
 
 		current := 1 / delta
 		fps = fps*smoothing + current*(1-smoothing)
+		/* FPS Calculation */
 
+		/* Update() */
 		if inputLayer.Update != nil {
 			inputLayer.Update()
 		}
 
 		for e := objects.Front(); e != nil; e = e.Next() {
-			item := GameObject(e.Value.(GameObject))
+			item := e.Value.(*GameObject)
 			if item.Update != nil {
 				item.Update()
 			}
 		}
+		/* Update() */
 
+		/* Physics() */
 		for e := objects.Front(); e != nil; e = e.Next() {
-			item := GameObject(e.Value.(GameObject))
+			item := e.Value.(*GameObject)
 			if item.Physics != nil {
 				item.Physics()
 			}
 		}
+		/* Physics() */
 
+		/* Render() */
 		for e := objects.Front(); e != nil; e = e.Next() {
-			item := GameObject(e.Value.(GameObject))
+			item := e.Value.(*GameObject)
 			if item.Render != nil {
 				item.Render()
 			}
@@ -157,14 +172,13 @@ func Run() {
 	}
 }
 
-// Private Implementation
-
 func registerSpecial(o GameObject, message string) GameObject {
 	if isGameObjectNil(o) {
 		m := fmt.Sprintf("Trying to register a nil loopable as %v", message)
 		panic(m)
 	}
 
+	o.started = false
 	return o
 }
 

@@ -23,7 +23,7 @@ func ListenToInput() {
 			handleKeyboard(event.(*sdl.KeyboardEvent))
 		case *sdl.QuitEvent:
 			println("Quit")
-			lifecycle.StopFirst()
+			lifecycle.StopInput()
 			return
 		}
 	}
@@ -34,9 +34,9 @@ func handleMouse(e *sdl.MouseButtonEvent) {
 
 	switch e.State {
 	case sdl.PRESSED:
-		events.Emit(events.INPUT_MOUSE_CLICK_DOWN, e.X, e.Y)
+		events.Emit(events.INPUT_MOUSE_CLICK_DOWN, int(e.X), int(e.Y))
 	case sdl.RELEASED:
-		events.Emit(events.INPUT_MOUSE_CLICK_UP, e.X, e.Y)
+		events.Emit(events.INPUT_MOUSE_CLICK_UP, int(e.X), int(e.Y))
 	}
 }
 

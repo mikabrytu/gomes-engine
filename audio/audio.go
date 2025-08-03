@@ -3,6 +3,7 @@ package audio
 import (
 	"container/list"
 
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/veandco/go-sdl2/mix"
 )
 
@@ -72,7 +73,10 @@ func ClearBuffer() {
 	}
 
 	buffer = list.New()
-	println("Audio buffer cleared")
+
+	if debug.IsEnabled() {
+		println("Audio buffer cleared")
+	}
 }
 
 func checkBuffer() {

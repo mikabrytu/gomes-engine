@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -72,7 +73,10 @@ func Stop(o *GameObject) {
 	}
 
 	if objects.Len() == 0 {
-		fmt.Println("There's no more loopables on the list. Quitting application")
+		if debug.IsEnabled() {
+			fmt.Println("There's no more loopables on the list. Quitting application")
+		}
+
 		running = false
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/mikabrytu/gomes-engine/audio"
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/dependencies"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/input"
@@ -18,6 +19,8 @@ func HiGomes() {
 }
 
 func Init(Title string, ScreenWidth, ScreenHeight int32) {
+	debug.DisableDebug()
+
 	dependencies.Init()
 	events.Init()
 	lifecycle.Init()

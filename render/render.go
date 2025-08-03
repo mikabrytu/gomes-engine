@@ -3,6 +3,7 @@ package render
 import (
 	"container/list"
 
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -42,7 +43,10 @@ func Render() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
-			println("Quit")
+			if debug.IsEnabled() {
+				println("Quit")
+			}
+
 			lifecycle.StopRender()
 			return
 		}

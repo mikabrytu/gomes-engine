@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"fmt"
 
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/utils"
 )
@@ -30,7 +31,10 @@ func RegisterBody(b *utils.RectSpecs, name string) RigidBody {
 	}
 
 	bodies.PushFront(body)
-	fmt.Printf("Registered body: %s\n", name)
+
+	if debug.IsEnabled() {
+		fmt.Printf("Registered body: %s\n", name)
+	}
 
 	return body
 }
@@ -50,7 +54,7 @@ func RemoveBody(body *RigidBody) {
 		}
 	}
 
-	if !found {
+	if debug.IsEnabled() && !found {
 		println("Body not found")
 	}
 }
@@ -142,7 +146,10 @@ func CheckCollision(collider *RigidBody) RigidBody {
 
 func ResolveDynamicCollisions(body *RigidBody, horizontal, vertical bool) {
 	if !body.IsDynamic {
-		fmt.Printf("Body %v is not set to Dynamic resolution.\n", body.Name)
+		if debug.IsEnabled() {
+			fmt.Printf("Body %v is not set to Dynamic resolution.\n", body.Name)
+		}
+
 		return
 	}
 

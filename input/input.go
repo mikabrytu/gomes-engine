@@ -3,6 +3,7 @@ package input
 import (
 	"fmt"
 
+	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/utils"
@@ -24,7 +25,10 @@ func ListenToInput() {
 		case *sdl.KeyboardEvent:
 			handleKeyboard(event)
 		case *sdl.QuitEvent:
-			println("Quit")
+			if debug.IsEnabled() {
+				println("Quit")
+			}
+
 			lifecycle.StopInput()
 			return
 		}
@@ -275,7 +279,6 @@ func handleKeyboard(e *sdl.KeyboardEvent) {
 			emit(pressedEvents, e.Keysym.Sym)
 		}
 	case sdl.RELEASED:
-		println("Released")
 		pressCount = 0
 		emit(releasedEvents, e.Keysym.Sym)
 	}
@@ -283,7 +286,7 @@ func handleKeyboard(e *sdl.KeyboardEvent) {
 
 func emit(list []KeyboardEvent, code sdl.Keycode) {
 	e := findEventByKeycode(list, code)
-	if e.name == "" {
+	if debug.IsEnabled() && e.name == "" {
 		m := fmt.Sprintf("%vcouldn't find event for key %v. Event not sent", utils.ERROR_PREFIX, code)
 		println(m)
 	}

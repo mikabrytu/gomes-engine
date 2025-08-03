@@ -45,6 +45,10 @@ func Register(o *GameObject) *GameObject {
 
 	_ = objects.PushFront(o)
 
+	if debug.IsEnabled() {
+		fmt.Printf("Object %v was registered in lifecycle\n", o.Id)
+	}
+
 	return o
 }
 
@@ -159,7 +163,12 @@ func Run() {
 
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Update != nil && !item.skip {
+
+			if !item.started || item.skip {
+				continue
+			}
+
+			if item.Update != nil {
 				item.Update()
 			}
 		}
@@ -168,7 +177,12 @@ func Run() {
 		/* Physics() */
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Physics != nil && !item.skip {
+
+			if !item.started || item.skip {
+				continue
+			}
+
+			if item.Physics != nil {
 				item.Physics()
 			}
 		}
@@ -177,7 +191,11 @@ func Run() {
 		/* Render() */
 		for e := objects.Front(); e != nil; e = e.Next() {
 			item := e.Value.(*GameObject)
-			if item.Render != nil && !item.skip {
+			if !item.started || item.skip {
+				continue
+			}
+
+			if item.Render != nil {
 				item.Render()
 			}
 		}

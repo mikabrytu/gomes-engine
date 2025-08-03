@@ -43,6 +43,10 @@ func Register(o *GameObject) *GameObject {
 	o.skip = false
 	idCounter++
 
+	if o.Start == nil {
+		o.started = true
+	}
+
 	_ = objects.PushFront(o)
 
 	if debug.IsEnabled() {

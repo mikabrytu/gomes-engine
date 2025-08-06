@@ -82,16 +82,23 @@ func Stop(o *GameObject) {
 
 	if objects.Len() == 0 {
 		if debug.IsEnabled() {
-			fmt.Println("There's no more loopables on the list. Quitting application")
+			fmt.Println("There's no more loopables on the list")
 		}
-
-		running = false
 	}
 }
 
 func StopById(id int) {
 	o := &GameObject{Id: id}
 	Stop(o)
+}
+
+func StopAll() {
+	for e := objects.Front(); e != nil; {
+		next := e.Next()
+		o := e.Value.(*GameObject)
+		Stop(o)
+		e = next
+	}
 }
 
 func StopInput() {

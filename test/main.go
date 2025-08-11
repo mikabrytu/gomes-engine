@@ -18,41 +18,47 @@ var SCREEN_SIZE = math.Vector2{
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Save System", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
+	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
-
 	lifecycle.SetSmoothStep(0.9)
-	draw()
+
+	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(params ...any) error {
+		lifecycle.Kill()
+		return nil
+	})
+
+	tint()
 
 	gomesengine.Run()
 }
 
-func draw() {
-	specs := utils.RectSpecs{
-		PosX:   0,
-		PosY:   0,
-		Width:  72,
-		Height: 64,
-	}
-
-	sprite := render.NewSprite("alien", "test/assets/img/alien.png")
-	sprite.Init(specs)
-
+func tint() {
 	lifecycle.Register(&lifecycle.GameObject{
 		Start: func() {
+			specs := utils.RectSpecs{
+				PosX:   0,
+				PosY:   0,
+				Width:  128,
+				Height: 128,
+			}
+
+			s1 := render.NewSprite("sprite1", "test/assets/img/square.png")
+			s1.Init(specs, render.Transparent)
+
+			specs.PosX = 128
+
+			s2 := render.NewSprite("sprite2", "test/assets/img/square.png")
+			s2.Init(specs, render.Yellow)
+
 			events.Subscribe(events.INPUT_MOUSE_CLICK, func(params ...any) error {
-				sprite.UpdateImage("test/assets/img/alien2.jpg")
+				println("Clicked")
+
+				specs.PosY = 128
+				s2.UpdateRect(specs)
+				s2.UpdateColor(render.Red)
+
 				return nil
 			})
-		},
-		Update: func() {
-			rect := sprite.GetRect()
-			rect.PosX += 1
-
-			sprite.UpdateRect(rect)
-		},
-		Destroy: func() {
-			sprite.ClearSprite()
 		},
 	})
 }

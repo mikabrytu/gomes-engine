@@ -19,6 +19,7 @@ type ScreenSpecs struct {
 type CopySpecs struct {
 	Texture *sdl.Texture
 	Rect    sdl.Rect
+	Color   Color
 }
 
 var window *sdl.Window
@@ -73,6 +74,13 @@ func AddToRenderer(copy *CopySpecs) {
 	for e := renderCopies.Front(); e != nil; e = e.Next() {
 		if e.Value.(*CopySpecs) == copy {
 			return
+		}
+	}
+
+	if copy.Color.A != 0 {
+		err := copy.Texture.SetColorMod(copy.Color.R, copy.Color.G, copy.Color.B)
+		if err != nil && debug.IsEnabled() {
+			println(err)
 		}
 	}
 

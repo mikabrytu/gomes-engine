@@ -20,6 +20,7 @@ type CopySpecs struct {
 	Texture *sdl.Texture
 	Rect    sdl.Rect
 	Color   Color
+	Update  bool
 }
 
 var window *sdl.Window
@@ -58,7 +59,8 @@ func Render() {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
 			specs := e.Value.(*CopySpecs)
 
-			if specs.Color.A != 0 {
+			if specs.Update && specs.Color.A != 0 {
+				specs.Update = false
 				err := specs.Texture.SetColorMod(specs.Color.R, specs.Color.G, specs.Color.B)
 				if err != nil && debug.IsEnabled() {
 					println(err)

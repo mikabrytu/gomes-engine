@@ -77,6 +77,7 @@ func (s *Sprite) newRect() {
 			W: int32(s.rect.Width),
 			H: int32(s.rect.Height),
 		},
-		Color: s.color,
+		Color:  s.color,
+		Update: true,
 	}
 }

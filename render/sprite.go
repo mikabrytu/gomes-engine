@@ -42,6 +42,11 @@ func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
 	s.newRect()
 }
 
+func (s *Sprite) UpdateColor(color Color) {
+	s.color = color
+	s.newRect()
+}
+
 func (s *Sprite) UpdateImage(path string) {
 	s.path = path
 	s.newTexture()

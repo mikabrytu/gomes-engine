@@ -57,6 +57,14 @@ func Render() {
 	if (renderCopies != nil) && (renderCopies.Len() > 0) {
 		for e := renderCopies.Front(); e != nil; e = e.Next() {
 			specs := e.Value.(*CopySpecs)
+
+			if specs.Color.A != 0 {
+				err := specs.Texture.SetColorMod(specs.Color.R, specs.Color.G, specs.Color.B)
+				if err != nil && debug.IsEnabled() {
+					println(err)
+				}
+			}
+
 			renderer.Copy(specs.Texture, nil, &specs.Rect)
 		}
 	}
@@ -74,13 +82,6 @@ func AddToRenderer(copy *CopySpecs) {
 	for e := renderCopies.Front(); e != nil; e = e.Next() {
 		if e.Value.(*CopySpecs) == copy {
 			return
-		}
-	}
-
-	if copy.Color.A != 0 {
-		err := copy.Texture.SetColorMod(copy.Color.R, copy.Color.G, copy.Color.B)
-		if err != nil && debug.IsEnabled() {
-			println(err)
 		}
 	}
 

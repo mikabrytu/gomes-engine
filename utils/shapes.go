@@ -6,3 +6,9 @@ type RectSpecs struct {
 	Width  int
 	Height int
 }
+
+type CircleSpecs struct {
+	PosX   int
+	PosY   int
+	Radius int
+}

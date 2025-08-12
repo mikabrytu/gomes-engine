@@ -27,38 +27,25 @@ func main() {
 		return nil
 	})
 
-	tint()
+	circle()
 
 	gomesengine.Run()
 }
 
-func tint() {
+func circle() {
+	circle := utils.CircleSpecs{
+		PosX:   SCREEN_SIZE.X / 2,
+		PosY:   SCREEN_SIZE.Y / 2,
+		Radius: 32,
+	}
+
 	lifecycle.Register(&lifecycle.GameObject{
-		Start: func() {
-			specs := utils.RectSpecs{
-				PosX:   0,
-				PosY:   0,
-				Width:  128,
-				Height: 128,
-			}
-
-			s1 := render.NewSprite("sprite1", "test/assets/img/square.png")
-			s1.Init(specs, render.Transparent)
-
-			specs.PosX = 128
-
-			s2 := render.NewSprite("sprite2", "test/assets/img/square.png")
-			s2.Init(specs, render.Yellow)
-
-			events.Subscribe(events.INPUT_MOUSE_CLICK, func(params ...any) error {
-				println("Clicked")
-
-				specs.PosY = 128
-				s2.UpdateRect(specs)
-				s2.UpdateColor(render.Red)
-
-				return nil
-			})
+		Update: func() {
+			circle.PosX += 1
+			circle.PosY += 1
+		},
+		Render: func() {
+			render.DrawCircle(circle, render.White)
 		},
 	})
 }

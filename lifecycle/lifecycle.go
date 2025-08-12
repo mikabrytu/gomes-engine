@@ -10,14 +10,15 @@ import (
 )
 
 type GameObject struct {
-	Id      int
-	Start   func()
-	Update  func()
-	Physics func()
-	Render  func()
-	Destroy func()
-	started bool
-	skip    bool
+	Id       int
+	Start    func()
+	Update   func()
+	Physics  func()
+	Render   func()
+	Destroy  func()
+	IsEnable bool
+	started  bool
+	skip     bool
 }
 
 var idCounter = 0
@@ -41,6 +42,7 @@ func Register(o *GameObject) *GameObject {
 	o.Id = idCounter
 	o.started = false
 	o.skip = false
+	o.IsEnable = true
 	idCounter++
 
 	if o.Start == nil {
@@ -239,6 +241,7 @@ func skip(o *GameObject, skip bool) {
 		item := e.Value.(*GameObject)
 		if item == o {
 			item.skip = skip
+			o.IsEnable = !skip
 			found = true
 			break
 		}

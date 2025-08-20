@@ -89,6 +89,11 @@ func (f *Font) UpdateColor(color render.Color) {
 	f.update = true
 }
 
+func (f *Font) UpdatePosition(position math.Vector2) {
+	f.position = position
+	f.update = true
+}
+
 func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
 	switch anchor {
 	case TopLeft:

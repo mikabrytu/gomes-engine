@@ -15,10 +15,12 @@ type Sprite struct {
 	color   Color
 }
 
-func NewSprite(name string, path string) *Sprite {
+func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Sprite {
 	sprite := &Sprite{
-		name: name,
-		path: path,
+		name:  name,
+		path:  path,
+		rect:  rect,
+		color: color,
 	}
 
 	return sprite
@@ -27,10 +29,7 @@ func NewSprite(name string, path string) *Sprite {
 // It prepares the necessary render dependencies and register the texture in the render loop.
 // Color is an optional tint rgb value that can be multiplied to the texture.
 // Use any transparent color to ignore this step
-func (s *Sprite) Init(specs utils.RectSpecs, color Color) {
-	s.rect = specs
-	s.color = color
-
+func (s *Sprite) Init() {
 	s.newTexture()
 	s.newRect()
 

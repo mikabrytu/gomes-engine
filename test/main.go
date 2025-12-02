@@ -24,8 +24,8 @@ func main() {
 	debug.EnableDebug()
 	lifecycle.SetSmoothStep(0.9)
 
-	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
-		click := data.(events.InputMouseClickEvent)
+	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK_UP, func(data any) {
+		click := data.(events.InputMouseClickUpEvent)
 		message := fmt.Sprintf("[X: %v, Y: %v]\n", click.Position.X, click.Position.Y)
 		print(message)
 	})

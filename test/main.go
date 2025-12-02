@@ -1,14 +1,14 @@
 package main
 
 import (
+	"fmt"
+
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
-	"github.com/mikabrytu/gomes-engine/render"
-	"github.com/mikabrytu/gomes-engine/utils"
 )
 
 var SCREEN_SIZE = math.Vector2{
@@ -16,36 +16,19 @@ var SCREEN_SIZE = math.Vector2{
 	Y: 600,
 }
 
+const REPEAT_EVENT string = "REPEAT_EVENT"
+
 func main() {
 	gomesengine.HiGomes()
 	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
 	lifecycle.SetSmoothStep(0.9)
 
-	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(params ...any) error {
-		lifecycle.Kill()
-		return nil
+	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
+		click := data.(events.InputMouseClickEvent)
+		message := fmt.Sprintf("[X: %v, Y: %v]\n", click.Position.X, click.Position.Y)
+		print(message)
 	})
-
-	circle()
 
 	gomesengine.Run()
-}
-
-func circle() {
-	circle := utils.CircleSpecs{
-		PosX:   SCREEN_SIZE.X / 2,
-		PosY:   SCREEN_SIZE.Y / 2,
-		Radius: 32,
-	}
-
-	lifecycle.Register(&lifecycle.GameObject{
-		Update: func() {
-			circle.PosX += 1
-			circle.PosY += 1
-		},
-		Render: func() {
-			render.DrawCircle(circle, render.White)
-		},
-	})
 }

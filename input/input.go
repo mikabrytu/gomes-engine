@@ -6,6 +6,7 @@ import (
 	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/events"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
@@ -36,13 +37,17 @@ func ListenToInput() {
 }
 
 func handleMouse(e *sdl.MouseButtonEvent) {
-	events.Emit(events.INPUT_MOUSE_CLICK)
-
 	switch e.State {
 	case sdl.PRESSED:
-		events.Emit(events.INPUT_MOUSE_CLICK_DOWN, int(e.X), int(e.Y))
+		events.Emit(events.Input, events.InputMouseClickEvent{
+			Position: math.Vector2{
+				X: int(e.X),
+				Y: int(e.Y),
+			},
+		})
+		//events.Emit(events.INPUT_MOUSE_CLICK_DOWN, int(e.X), int(e.Y))
 	case sdl.RELEASED:
-		events.Emit(events.INPUT_MOUSE_CLICK_UP, int(e.X), int(e.Y))
+		//events.Emit(events.INPUT_MOUSE_CLICK_UP, int(e.X), int(e.Y))
 	}
 }
 
@@ -291,7 +296,7 @@ func emit(list []KeyboardEvent, code sdl.Keycode) {
 		println(m)
 	}
 
-	events.Emit(e.name)
+	//events.Emit(e.name)
 }
 
 func findEventByKeycode(list []KeyboardEvent, filter sdl.Keycode) KeyboardEvent {

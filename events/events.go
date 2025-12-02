@@ -1,33 +1,44 @@
 package events
 
 import (
-	"fmt"
-
-	"github.com/AlexanderGrom/go-event"
+	"github.com/Papiermond/eventbus"
 )
 
-var dispatcher event.Dispatcher
+type EventLayer int
+
+const (
+	Audio EventLayer = iota
+	Game
+	Input
+	Lifecycle
+	Physics
+	Render
+)
+
+var audioBus eventbus.EventBus
+var gameBus eventbus.EventBus
+var inputBus eventbus.EventBus
+var lifecycleBus eventbus.EventBus
+var physicsBus eventbus.EventBus
+var renderBus eventbus.EventBus
 
 func Init() {
-	dispatcher = event.New()
+	audioBus = eventbus.New()
+	gameBus = eventbus.New()
+	inputBus = eventbus.New()
+	lifecycleBus = eventbus.New()
+	physicsBus = eventbus.New()
+	renderBus = eventbus.New()
 }
 
-func Subscribe(name string, callback func(params ...any) error) {
-	if name == "" {
-		panic("Event Name is empty")
-	}
+func Emit(layer EventLayer, event any) {
+	go func() {
+		inputBus.Publish(event.(eventbus.Event))
+	}()
+}
 
-	if callback == nil {
-		m := fmt.Sprintf("Event Callback for %s is nil", name)
-		panic(m)
-	}
-
-	dispatcher.On(name, func(args ...any) error {
-		callback(args)
-		return nil
+func Subscribe(layer EventLayer, key string, callback func(data any)) {
+	inputBus.Subscribe(eventbus.EventType(key), func(e eventbus.Event) {
+		callback(e)
 	})
-}
-
-func Emit(name string, params ...any) {
-	dispatcher.Go(name, params)
 }

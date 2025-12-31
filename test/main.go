@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -14,15 +16,18 @@ var SCREEN_SIZE = math.Vector2{
 	Y: 600,
 }
 
+const REPEAT_EVENT string = "REPEAT_EVENT"
+
 func main() {
 	gomesengine.HiGomes()
 	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
 	lifecycle.SetSmoothStep(0.9)
 
-	events.Subscribe(events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(params ...any) error {
-		lifecycle.Kill()
-		return nil
+	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK_UP, func(data any) {
+		click := data.(events.InputMouseClickUpEvent)
+		message := fmt.Sprintf("[X: %v, Y: %v]\n", click.Position.X, click.Position.Y)
+		print(message)
 	})
 
 	gomesengine.Run()

@@ -22,7 +22,9 @@ func ListenToInput() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event := event.(type) {
 		case *sdl.MouseButtonEvent:
-			handleMouse(event)
+			handleMouseClick(event)
+		case *sdl.MouseMotionEvent:
+			handleMouseMotion(event)
 		case *sdl.KeyboardEvent:
 			handleKeyboard(event)
 		case *sdl.QuitEvent:
@@ -36,8 +38,25 @@ func ListenToInput() {
 	}
 }
 
-func handleMouse(e *sdl.MouseButtonEvent) {
-	events.Emit(events.Input, events.InputMouseClickEvent{})
+func handleMouseClick(e *sdl.MouseButtonEvent) {
+	index := utils.MouseButtonIndex{}
+	if e.Button == sdl.BUTTON_LEFT {
+		index.Left = 1
+	}
+	if e.Button == sdl.BUTTON_RIGHT {
+		index.Right = 1
+	}
+	if e.Button == sdl.BUTTON_MIDDLE {
+		index.Middle = 1
+	}
+
+	events.Emit(events.Input, events.InputMouseClickEvent{
+		Position: math.Vector2{
+			X: int(e.X),
+			Y: int(e.Y),
+		},
+		Index: index,
+	})
 
 	switch e.State {
 	case sdl.PRESSED:
@@ -46,6 +65,7 @@ func handleMouse(e *sdl.MouseButtonEvent) {
 				X: int(e.X),
 				Y: int(e.Y),
 			},
+			Index: index,
 		}
 
 		events.Emit(events.Input, event)
@@ -55,10 +75,20 @@ func handleMouse(e *sdl.MouseButtonEvent) {
 				X: int(e.X),
 				Y: int(e.Y),
 			},
+			Index: index,
 		}
 
 		events.Emit(events.Input, event)
 	}
+}
+
+func handleMouseMotion(e *sdl.MouseMotionEvent) {
+	events.Emit(events.Input, events.InputMouseMoveEvent{
+		Position: math.Vector2{
+			X: int(e.X),
+			Y: int(e.Y),
+		},
+	})
 }
 
 func handleKeyboard(e *sdl.KeyboardEvent) {

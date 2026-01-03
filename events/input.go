@@ -3,16 +3,24 @@ package events
 import (
 	"github.com/Papiermond/eventbus"
 	"github.com/mikabrytu/gomes-engine/math"
+	"github.com/mikabrytu/gomes-engine/utils"
 )
 
-type InputMouseClickEvent struct{}
+type InputMouseClickEvent struct {
+	Position math.Vector2
+	Index    utils.MouseButtonIndex
+}
 type InputMouseClickUpEvent struct {
 	Position math.Vector2
+	Index    utils.MouseButtonIndex
 }
 type InputMouseClickDownEvent struct {
 	Position math.Vector2
+	Index    utils.MouseButtonIndex
 }
-type InputMouseMoveEvent struct{}
+type InputMouseMoveEvent struct {
+	Position math.Vector2
+}
 type InputMouseWheelEvent struct{}
 type InputKeyboardPressedAEvent struct{}
 type InputKeyboardPressedBEvent struct{}

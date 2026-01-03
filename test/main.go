@@ -42,5 +42,11 @@ func main() {
 		print(message)
 	})
 
+	events.Subscribe(events.Input, events.INPUT_MOUSE_MOVE, func(data any) {
+		move := data.(events.InputMouseMoveEvent)
+		message := fmt.Sprintf("Mouse moving. Current position {%d, %d}\n", move.Position.X, move.Position.Y)
+		print(message)
+	})
+
 	gomesengine.Run()
 }

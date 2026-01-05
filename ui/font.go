@@ -79,6 +79,18 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 	})
 }
 
+func (f *Font) Enable() {
+	f.copy.Render = true
+}
+
+func (f *Font) Disable() {
+	f.copy.Render = false
+}
+
+func (f *Font) IsEnabled() bool {
+	return f.copy.Render
+}
+
 func (f *Font) UpdateText(text string) {
 	f.text = text
 	f.update = true
@@ -159,6 +171,7 @@ func (f *Font) prepareRender() {
 			W: int32(f.surface.W),
 			H: int32(f.surface.H),
 		},
+		Render: true,
 	}
 }
 

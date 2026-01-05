@@ -36,6 +36,18 @@ func (s *Sprite) Init() {
 	AddToRenderer(&s.copy)
 }
 
+func (s *Sprite) Enable() {
+	s.copy.Render = true
+}
+
+func (s *Sprite) Disable() {
+	s.copy.Render = false
+}
+
+func (s *Sprite) IsEnabled() bool {
+	return s.copy.Render
+}
+
 func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
 	s.rect = rect
 	s.newRect()
@@ -78,5 +90,6 @@ func (s *Sprite) newRect() {
 		},
 		Color:  s.color,
 		Update: true,
+		Render: true,
 	}
 }

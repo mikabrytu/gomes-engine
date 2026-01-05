@@ -21,6 +21,7 @@ type CopySpecs struct {
 	Rect    sdl.Rect
 	Color   Color
 	Update  bool
+	Render  bool
 }
 
 var window *sdl.Window
@@ -67,7 +68,9 @@ func Render() {
 				}
 			}
 
-			renderer.Copy(specs.Texture, nil, &specs.Rect)
+			if specs.Render {
+				renderer.Copy(specs.Texture, nil, &specs.Rect)
+			}
 		}
 	}
 
@@ -88,6 +91,20 @@ func AddToRenderer(copy *CopySpecs) {
 	}
 
 	renderCopies.PushBack(copy)
+}
+
+func RemoveFromRenderer(copy *CopySpecs) {
+	if renderCopies == nil {
+		renderCopies = list.New()
+	}
+
+	for e := renderCopies.Front(); e != nil; e = e.Next() {
+		if e.Value.(*CopySpecs) == copy {
+			renderCopies.Remove(e)
+
+			return
+		}
+	}
 }
 
 func GetRenderer() *sdl.Renderer {

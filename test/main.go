@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -8,6 +10,7 @@ import (
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/render"
+	"github.com/mikabrytu/gomes-engine/ui"
 	"github.com/mikabrytu/gomes-engine/utils"
 )
 
@@ -41,6 +44,17 @@ func main() {
 		},
 	})
 
+	press_count := 0
+	ui_text := "Spaces pressed:"
+	font_specs := ui.FontSpecs{
+		Name: "Font",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 32,
+	}
+	font := ui.NewFont(font_specs, SCREEN_SIZE)
+	font.Init(ui_text, render.White, math.Vector2{X: 0, Y: 0})
+	font.AlignText(ui.TopCenter, math.Vector2{X: 0, Y: 16})
+
 	// Event Listeners
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {
@@ -52,13 +66,21 @@ func main() {
 
 		if click.Index.Left == 1 {
 			sprite.Disable()
+			font.Disable()
 			lifecycle.Disable(game_object)
 		}
 
 		if click.Index.Right == 1 {
 			sprite.Enable()
+			font.Enable()
 			lifecycle.Enable(game_object)
 		}
+	})
+
+	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
+		press_count += 1
+		message := ui_text + " " + fmt.Sprint(press_count)
+		font.UpdateText(message)
 	})
 
 	gomesengine.Run()

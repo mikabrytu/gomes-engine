@@ -68,6 +68,7 @@ func (s *Sprite) GetRect() utils.RectSpecs {
 }
 
 func (s *Sprite) ClearSprite() {
+	RemoveFromRenderer(&s.copy)
 	s.texture.Destroy()
 }
 

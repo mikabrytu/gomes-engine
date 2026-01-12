@@ -9,88 +9,52 @@ import (
 type Sprite struct {
 	name    string
 	path    string
-	texture *sdl.Texture
-	copy    CopySpecs
 	rect    utils.RectSpecs
-	color   Color
+	texture *sdl.Texture
+	enabled bool
 }
 
-func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Sprite {
+func NewSprite(name string, path string, rect utils.RectSpecs) *Sprite {
 	sprite := &Sprite{
-		name:  name,
-		path:  path,
-		rect:  rect,
-		color: color,
+		name:    name,
+		path:    path,
+		rect:    rect,
+		enabled: true,
 	}
 
 	return sprite
 }
 
-// It prepares the necessary render dependencies and register the texture in the render loop.
-// Color is an optional tint rgb value that can be multiplied to the texture.
-// Use any transparent color to ignore this step
 func (s *Sprite) Init() {
-	s.newTexture()
-	s.newRect()
-
-	AddToRenderer(&s.copy)
-}
-
-func (s *Sprite) Enable() {
-	s.copy.Render = true
-}
-
-func (s *Sprite) Disable() {
-	s.copy.Render = false
-}
-
-func (s *Sprite) IsEnabled() bool {
-	return s.copy.Render
-}
-
-func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
-	s.rect = rect
-	s.newRect()
-}
-
-func (s *Sprite) UpdateColor(color Color) {
-	s.color = color
-	s.newRect()
-}
-
-func (s *Sprite) UpdateImage(path string) {
-	s.path = path
-	s.newTexture()
-}
-
-func (s *Sprite) GetRect() utils.RectSpecs {
-	return s.rect
-}
-
-func (s *Sprite) ClearSprite() {
-	RemoveFromRenderer(&s.copy)
-	s.texture.Destroy()
-}
-
-func (s *Sprite) newTexture() {
-	var err error
-	s.texture, err = img.LoadTexture(renderer, s.path)
+	surface, err := img.Load(s.path)
 	if err != nil {
 		panic(err)
 	}
+
+	s.texture, err = renderer.CreateTextureFromSurface(surface)
+	if err != nil {
+		panic(err)
+	}
+	surface.Free()
+
+	RegisterTexture(s.texture, s.rect)
 }
 
-func (s *Sprite) newRect() {
-	s.copy = CopySpecs{
-		Texture: s.texture,
-		Rect: sdl.Rect{
-			X: int32(s.rect.PosX),
-			Y: int32(s.rect.PosY),
-			W: int32(s.rect.Width),
-			H: int32(s.rect.Height),
-		},
-		Color:  s.color,
-		Update: true,
-		Render: true,
+// func (s *Sprite) Enable() {
+// 	s.enabled = true
+// }
+
+// func (s *Sprite) Disable() {
+// 	s.enabled = false
+// }
+
+// func (s *Sprite) IsEnabled() bool {
+// 	return s.enabled
+// }
+
+func (s *Sprite) Clear() {
+	err := s.texture.Destroy()
+	if err != nil {
+		panic(err)
 	}
 }

@@ -1,10 +1,9 @@
 package render
 
 import (
-	"container/list"
-
 	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
+	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -17,16 +16,14 @@ type ScreenSpecs struct {
 }
 
 type CopySpecs struct {
-	Texture *sdl.Texture
-	Rect    sdl.Rect
-	Color   Color
-	Update  bool
-	Render  bool
+	texture *sdl.Texture
+	rect    *sdl.Rect
 }
 
 var window *sdl.Window
 var renderer *sdl.Renderer
-var renderCopies *list.List
+var copies []CopySpecs
+var backgroundColor Color
 
 func CreateScreen(s ScreenSpecs) {
 	var err error
@@ -40,9 +37,13 @@ func CreateScreen(s ScreenSpecs) {
 	if err != nil {
 		panic(err)
 	}
+
+	copies = make([]CopySpecs, 0)
+	backgroundColor = Black
 }
 
 func Render() {
+	// TODO: Check a better place for this
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event.(type) {
 		case *sdl.QuitEvent:
@@ -55,67 +56,56 @@ func Render() {
 		}
 	}
 
-	// The copies should render before the present/clear section, otherwise it won't render.
-	if (renderCopies != nil) && (renderCopies.Len() > 0) {
-		for e := renderCopies.Front(); e != nil; e = e.Next() {
-			specs := e.Value.(*CopySpecs)
+	renderer.SetDrawColor(
+		backgroundColor.R,
+		backgroundColor.G,
+		backgroundColor.B,
+		backgroundColor.A,
+	)
+	renderer.Clear()
 
-			if specs.Update && specs.Color.A != 0 {
-				specs.Update = false
-				err := specs.Texture.SetColorMod(specs.Color.R, specs.Color.G, specs.Color.B)
-				if err != nil && debug.IsEnabled() {
-					println(err)
-				}
-			}
-
-			if specs.Render {
-				renderer.Copy(specs.Texture, nil, &specs.Rect)
-			}
-		}
+	for _, copy := range copies {
+		renderer.Copy(
+			copy.texture,
+			nil,
+			copy.rect,
+		)
 	}
 
 	renderer.Present()
-	renderer.SetDrawColor(Black.R, Black.G, Black.B, Black.A)
-	renderer.Clear()
 }
 
-func AddToRenderer(copy *CopySpecs) {
-	if renderCopies == nil {
-		renderCopies = list.New()
-	}
-
-	for e := renderCopies.Front(); e != nil; e = e.Next() {
-		if e.Value.(*CopySpecs) == copy {
+func RegisterTexture(texture *sdl.Texture, rect utils.RectSpecs) {
+	for _, c := range copies {
+		if c.texture == texture {
+			println("Texture already registered in copy list")
 			return
 		}
 	}
 
-	renderCopies.PushBack(copy)
-}
-
-func RemoveFromRenderer(copy *CopySpecs) {
-	if renderCopies == nil {
-		renderCopies = list.New()
+	copy := CopySpecs{
+		texture: texture,
+		rect: &sdl.Rect{
+			X: int32(rect.PosX),
+			Y: int32(rect.PosY),
+			W: int32(rect.Width),
+			H: int32(rect.Height),
+		},
 	}
-
-	for e := renderCopies.Front(); e != nil; e = e.Next() {
-		if e.Value.(*CopySpecs) == copy {
-			renderCopies.Remove(e)
-
-			return
-		}
-	}
+	copies = append(copies, copy)
 }
 
 func GetRenderer() *sdl.Renderer {
 	return renderer
 }
 
-func Destroy() {
-	renderCopies = list.New()
+func SetBackgroundColor(color Color) {
+	backgroundColor = color
+}
 
-	defer window.Destroy()
+func Destroy() {
 	defer renderer.Destroy()
+	defer window.Destroy()
 
 	lifecycle.Kill()
 }

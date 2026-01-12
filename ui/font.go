@@ -34,7 +34,6 @@ type Font struct {
 	texture  *sdl.Texture
 	text     string
 	position math.Vector2
-	copy     render.CopySpecs
 	color    render.Color
 	screen   math.Vector2
 	update   bool
@@ -71,24 +70,12 @@ func (f *Font) Init(text string, color render.Color, position math.Vector2) {
 			}
 		},
 		Render: func() {
-			render.AddToRenderer(&f.copy)
+			//render.AddToRenderer(&f.copy)
 		},
 		Destroy: func() {
 			f.ClearFont()
 		},
 	})
-}
-
-func (f *Font) Enable() {
-	f.copy.Render = true
-}
-
-func (f *Font) Disable() {
-	f.copy.Render = false
-}
-
-func (f *Font) IsEnabled() bool {
-	return f.copy.Render
 }
 
 func (f *Font) UpdateText(text string) {
@@ -107,7 +94,7 @@ func (f *Font) UpdatePosition(position math.Vector2) {
 }
 
 func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
-	switch anchor {
+	/*switch anchor {
 	case TopLeft:
 		f.copy.Rect.X = int32(0 + offset.X)
 		f.copy.Rect.Y = int32(0 + offset.Y)
@@ -140,7 +127,7 @@ func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {
 	f.position = math.Vector2{
 		X: int(f.copy.Rect.X),
 		Y: int(f.copy.Rect.Y),
-	}
+	}*/
 }
 
 func (f *Font) ClearFont() {
@@ -161,17 +148,6 @@ func (f *Font) prepareRender() {
 	f.texture, err = render.GetRenderer().CreateTextureFromSurface(f.surface)
 	if err != nil {
 		panic(err)
-	}
-
-	f.copy = render.CopySpecs{
-		Texture: f.texture,
-		Rect: sdl.Rect{
-			X: int32(f.position.X),
-			Y: int32(f.position.Y),
-			W: int32(f.surface.W),
-			H: int32(f.surface.H),
-		},
-		Render: true,
 	}
 }
 

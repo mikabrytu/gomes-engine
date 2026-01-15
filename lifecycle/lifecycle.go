@@ -25,6 +25,7 @@ var running bool = false
 var objects *list.List
 var inputLayer GameObject
 var renderLayer GameObject
+var tasks chan func()
 
 // Public API
 
@@ -35,6 +36,7 @@ func Init() {
 	idCounter = 0
 	running = true
 	smoothing = 0.5
+	tasks = make(chan func())
 }
 
 func Register(o *GameObject) *GameObject {
@@ -138,85 +140,94 @@ func GetTotalObjects() int {
 
 func Run() {
 	for running {
-		/* Start() */
-		if inputLayer.Start != nil && !inputLayer.started && !inputLayer.skip {
-			inputLayer.Start()
-			inputLayer.started = true
-		}
-
-		for e := objects.Front(); e != nil; e = e.Next() {
-			item := e.Value.(*GameObject)
-			if item.Start != nil && !item.started && !item.skip {
-				item.Start()
-				item.started = true
-			}
-		}
-
-		if renderLayer.Start != nil && !renderLayer.started && !inputLayer.skip {
-			renderLayer.Start()
-			renderLayer.started = true
-		}
-		/* Start() */
-
-		/* FPS Calculation */
-		now := time.Now()
-		delta := now.Sub(prevTime).Seconds()
-		prevTime = now
-
-		current := 1 / delta
-		fps = fps*smoothing + current*(1-smoothing)
-		/* FPS Calculation */
-
-		/* Update() */
-		if inputLayer.Update != nil {
-			inputLayer.Update()
-		}
-
-		for e := objects.Front(); e != nil; e = e.Next() {
-			item := e.Value.(*GameObject)
-
-			if !item.started || item.skip {
-				continue
+		select {
+		case task := <-tasks:
+			task()
+		default:
+			/* Start() */
+			if inputLayer.Start != nil && !inputLayer.started && !inputLayer.skip {
+				inputLayer.Start()
+				inputLayer.started = true
 			}
 
-			if item.Update != nil {
-				item.Update()
+			for e := objects.Front(); e != nil; e = e.Next() {
+				item := e.Value.(*GameObject)
+				if item.Start != nil && !item.started && !item.skip {
+					item.Start()
+					item.started = true
+				}
 			}
+
+			if renderLayer.Start != nil && !renderLayer.started && !inputLayer.skip {
+				renderLayer.Start()
+				renderLayer.started = true
+			}
+			/* Start() */
+
+			/* FPS Calculation */
+			now := time.Now()
+			delta := now.Sub(prevTime).Seconds()
+			prevTime = now
+
+			current := 1 / delta
+			fps = fps*smoothing + current*(1-smoothing)
+			/* FPS Calculation */
+
+			/* Update() */
+			if inputLayer.Update != nil {
+				inputLayer.Update()
+			}
+
+			for e := objects.Front(); e != nil; e = e.Next() {
+				item := e.Value.(*GameObject)
+
+				if !item.started || item.skip {
+					continue
+				}
+
+				if item.Update != nil {
+					item.Update()
+				}
+			}
+			/* Update() */
+
+			/* Physics() */
+			for e := objects.Front(); e != nil; e = e.Next() {
+				item := e.Value.(*GameObject)
+
+				if !item.started || item.skip {
+					continue
+				}
+
+				if item.Physics != nil {
+					item.Physics()
+				}
+			}
+			/* Physics() */
+
+			/* Render() */
+			for e := objects.Front(); e != nil; e = e.Next() {
+				item := e.Value.(*GameObject)
+				if !item.started || item.skip {
+					continue
+				}
+
+				if item.Render != nil {
+					item.Render()
+				}
+			}
+
+			if renderLayer.Update != nil {
+				renderLayer.Update()
+			}
+
+			sdl.Delay(15)
 		}
-		/* Update() */
-
-		/* Physics() */
-		for e := objects.Front(); e != nil; e = e.Next() {
-			item := e.Value.(*GameObject)
-
-			if !item.started || item.skip {
-				continue
-			}
-
-			if item.Physics != nil {
-				item.Physics()
-			}
-		}
-		/* Physics() */
-
-		/* Render() */
-		for e := objects.Front(); e != nil; e = e.Next() {
-			item := e.Value.(*GameObject)
-			if !item.started || item.skip {
-				continue
-			}
-
-			if item.Render != nil {
-				item.Render()
-			}
-		}
-
-		if renderLayer.Update != nil {
-			renderLayer.Update()
-		}
-
-		sdl.Delay(15)
 	}
+}
+
+func RunOnMain(task func()) {
+	tasks <- task
 }
 
 func registerSpecial(o GameObject, message string) GameObject {

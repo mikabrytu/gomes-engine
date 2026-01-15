@@ -39,6 +39,7 @@ func main() {
 		"Green",
 		"test/assets/img/alien.png",
 		rect,
+		render.Red,
 	)
 
 	lifecycle.Register(&lifecycle.GameObject{
@@ -51,7 +52,7 @@ func main() {
 	})
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
-		sprite.UpdateImage("test/assets/img/mario.png")
+		sprite.UpdateImage("test/assets/img/mario.png", render.Blue)
 	})
 
 	gomesengine.Run()

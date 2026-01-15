@@ -3,7 +3,7 @@ package render
 import (
 	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
-	"github.com/mikabrytu/gomes-engine/utils"
+	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -16,12 +16,16 @@ type ScreenSpecs struct {
 }
 
 type CopySpecs struct {
+	sprite  *Sprite
 	texture *sdl.Texture
 	rect    *sdl.Rect
+	color   Color
 }
 
 var window *sdl.Window
 var renderer *sdl.Renderer
+var toCreate []*Sprite
+var toDestroy []*Sprite
 var copies []CopySpecs
 var backgroundColor Color
 
@@ -38,7 +42,10 @@ func CreateScreen(s ScreenSpecs) {
 		panic(err)
 	}
 
+	toCreate = make([]*Sprite, 0)
+	toDestroy = make([]*Sprite, 0)
 	copies = make([]CopySpecs, 0)
+
 	backgroundColor = Black
 }
 
@@ -64,46 +71,30 @@ func Render() {
 	)
 	renderer.Clear()
 
+	createTextures()
+
 	for _, copy := range copies {
+		if copy.sprite.enabled == false {
+			continue
+		}
+
 		renderer.Copy(
 			copy.texture,
 			nil,
 			copy.rect,
 		)
+		renderer.Present()
 	}
 
-	renderer.Present()
+	destroyTextures()
 }
 
-func RegisterTexture(texture *sdl.Texture, rect utils.RectSpecs) {
-	for _, c := range copies {
-		if c.texture == texture {
-			println("Texture already registered in copy list")
-			return
-		}
-	}
-
-	copy := CopySpecs{
-		texture: texture,
-		rect: &sdl.Rect{
-			X: int32(rect.PosX),
-			Y: int32(rect.PosY),
-			W: int32(rect.Width),
-			H: int32(rect.Height),
-		},
-	}
-	copies = append(copies, copy)
+func RegisterSprite(sprite *Sprite) {
+	toCreate = append(toCreate, sprite)
 }
 
-func RemoveTexture(texture *sdl.Texture) {
-	for i, copy := range copies {
-		if copy.texture != texture {
-			continue
-		}
-
-		copies = append(copies[:i], copies[i+1:]...)
-		println("Copy removed from list")
-	}
+func ClearSprite(sprite *Sprite) {
+	toDestroy = append(toDestroy, sprite)
 }
 
 func GetRenderer() *sdl.Renderer {
@@ -119,4 +110,56 @@ func Destroy() {
 	defer window.Destroy()
 
 	lifecycle.Kill()
+}
+
+func createTextures() {
+	if len(toCreate) == 0 {
+		return
+	}
+
+	for _, sprite := range toCreate {
+		texture, err := img.LoadTexture(renderer, sprite.path)
+		if err != nil {
+			panic(err)
+		}
+
+		copy := CopySpecs{
+			sprite:  sprite,
+			texture: texture,
+			rect: &sdl.Rect{
+				X: int32(sprite.rect.PosX),
+				Y: int32(sprite.rect.PosY),
+				W: int32(sprite.rect.Width),
+				H: int32(sprite.rect.Height),
+			},
+			color: sprite.color,
+		}
+		copies = append(copies, copy)
+	}
+
+	toCreate = toCreate[:0]
+}
+
+func destroyTextures() {
+	if len(toDestroy) == 0 {
+		return
+	}
+
+	for _, sprite := range toDestroy {
+		for i, copy := range copies {
+			if copy.sprite != sprite {
+				continue
+			}
+
+			err := copy.texture.Destroy()
+			if err != nil {
+				panic(err)
+			}
+
+			copies = append(copies[:i], copies[i+1:]...)
+			break
+		}
+	}
+
+	toDestroy = toDestroy[:0]
 }

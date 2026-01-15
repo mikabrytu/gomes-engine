@@ -62,6 +62,9 @@ func main() {
 
 			font.AlignText(anchor, offset)
 		},
+		Render: func() {
+			render.DrawRect(utils.RectSpecs{PosX: 0, PosY: 128, Width: 256, Height: 32}, render.Green)
+		},
 		Destroy: func() {
 			sprite.Clear()
 			font.Clear()

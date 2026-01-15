@@ -78,6 +78,14 @@ func Render() {
 		}
 	}
 
+	// The renderer presents the textures of the previous frame
+	// so the draw rect function can work without a refactor
+	renderer.Present()
+
+	destroySprites()
+	destroyFonts()
+
+	// Now the next frame is prepared before rendered
 	renderer.SetDrawColor(
 		backgroundColor.R,
 		backgroundColor.G,
@@ -138,11 +146,6 @@ func Render() {
 			copy.rect,
 		)
 	}
-
-	renderer.Present()
-
-	destroySprites()
-	destroyFonts()
 }
 
 func RegisterSprite(sprite *Sprite) {

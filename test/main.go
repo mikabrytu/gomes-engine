@@ -23,6 +23,7 @@ func main() {
 	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
 	lifecycle.SetSmoothStep(0.9)
+	render.SetBackgroundColor(render.Pink)
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {
 		lifecycle.Kill()
@@ -35,12 +36,12 @@ func main() {
 		Height: 64,
 	}
 	sprite := render.NewSprite(
-		"Sprite",
+		"Green",
 		"test/assets/img/alien.png",
 		rect,
 	)
 
-	o := lifecycle.Register(&lifecycle.GameObject{
+	lifecycle.Register(&lifecycle.GameObject{
 		Start: func() {
 			sprite.Init()
 		},
@@ -50,11 +51,7 @@ func main() {
 	})
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
-		if o == nil {
-			return
-		}
-
-		lifecycle.Stop(o)
+		sprite.UpdateImage("test/assets/img/mario.png")
 	})
 
 	gomesengine.Run()

@@ -10,6 +10,7 @@ type Sprite struct {
 	rect    utils.RectSpecs
 	color   Color
 	enabled bool
+	update  bool
 }
 
 func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Sprite {
@@ -19,6 +20,7 @@ func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Spr
 		rect:    rect,
 		color:   color,
 		enabled: true,
+		update:  false,
 	}
 
 	return sprite
@@ -26,6 +28,10 @@ func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Spr
 
 func (s *Sprite) Init() {
 	RegisterSprite(s)
+}
+
+func (s *Sprite) Clear() {
+	ClearSprite(s)
 }
 
 func (s *Sprite) Enable() {
@@ -48,6 +54,11 @@ func (s *Sprite) UpdateImage(path string, color Color) {
 	s.Init()
 }
 
-func (s *Sprite) Clear() {
-	ClearSprite(s)
+func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
+	s.rect = rect
+	s.update = true
+}
+
+func (s *Sprite) GetRect() utils.RectSpecs {
+	return s.rect
 }

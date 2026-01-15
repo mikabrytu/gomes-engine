@@ -46,6 +46,10 @@ func main() {
 		Start: func() {
 			sprite.Init()
 		},
+		Update: func() {
+			rect.PosX += 1
+			sprite.UpdateRect(rect)
+		},
 		Destroy: func() {
 			sprite.Clear()
 		},

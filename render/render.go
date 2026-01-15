@@ -78,6 +78,15 @@ func Render() {
 			continue
 		}
 
+		if copy.sprite.update {
+			copy.rect = &sdl.Rect{
+				X: int32(copy.sprite.rect.PosX),
+				Y: int32(copy.sprite.rect.PosY),
+				W: int32(copy.sprite.rect.Width),
+				H: int32(copy.sprite.rect.Height),
+			}
+		}
+
 		renderer.Copy(
 			copy.texture,
 			nil,

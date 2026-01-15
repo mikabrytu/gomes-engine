@@ -1,6 +1,7 @@
 package render
 
 import (
+	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/utils"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
@@ -40,21 +41,20 @@ func (s *Sprite) Init() {
 	RegisterTexture(s.texture, s.rect)
 }
 
-// func (s *Sprite) Enable() {
-// 	s.enabled = true
-// }
+func (s *Sprite) UpdateImage(path string) {
+	s.path = path
 
-// func (s *Sprite) Disable() {
-// 	s.enabled = false
-// }
-
-// func (s *Sprite) IsEnabled() bool {
-// 	return s.enabled
-// }
+	s.Clear()
+	s.Init()
+}
 
 func (s *Sprite) Clear() {
-	err := s.texture.Destroy()
-	if err != nil {
-		panic(err)
-	}
+	RemoveTexture(s.texture)
+
+	lifecycle.RunOnMain(func() {
+		err := s.texture.Destroy()
+		if err != nil {
+			panic(err)
+		}
+	})
 }

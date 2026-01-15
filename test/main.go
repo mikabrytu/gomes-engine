@@ -35,35 +35,55 @@ func main() {
 		Width:  64,
 		Height: 64,
 	}
+	fontspecs := render.FontSpecs{
+		Name: "Font",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 32,
+	}
+
 	sprite := render.NewSprite(
 		"Green",
 		"test/assets/img/alien.png",
 		rect,
 		render.Red,
 	)
+	font := render.NewFont(fontspecs, SCREEN_SIZE)
 
+	anchor := render.TopLeft
+	offset := math.Vector2{X: 16, Y: 16}
 	lifecycle.Register(&lifecycle.GameObject{
 		Start: func() {
 			sprite.Init()
+			font.Init("Texto!", render.White, math.Vector2{X: 0, Y: 0})
 		},
 		Update: func() {
 			rect.PosX += 1
 			sprite.UpdateRect(rect)
+
+			font.AlignText(anchor, offset)
 		},
 		Destroy: func() {
 			sprite.Clear()
+			font.Clear()
 		},
 	})
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
 		sprite.UpdateImage("test/assets/img/mario.png", render.Blue)
+
+		font.UpdateText("More Text to render...")
+		font.UpdateColor(render.Magenta)
+		anchor = render.TopCenter
+		offset.X = 0
 	})
 
 	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
 		if sprite.IsEnable() {
 			sprite.Disable()
+			font.Disable()
 		} else {
 			sprite.Enable()
+			font.Enable()
 		}
 	})
 

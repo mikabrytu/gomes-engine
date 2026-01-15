@@ -55,5 +55,13 @@ func main() {
 		sprite.UpdateImage("test/assets/img/mario.png", render.Blue)
 	})
 
+	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
+		if sprite.IsEnable() {
+			sprite.Disable()
+		} else {
+			sprite.Enable()
+		}
+	})
+
 	gomesengine.Run()
 }

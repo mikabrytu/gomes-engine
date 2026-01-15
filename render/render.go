@@ -83,8 +83,9 @@ func Render() {
 			nil,
 			copy.rect,
 		)
-		renderer.Present()
 	}
+
+	renderer.Present()
 
 	destroyTextures()
 }

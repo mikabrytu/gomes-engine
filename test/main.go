@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -10,7 +8,6 @@ import (
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/math"
 	"github.com/mikabrytu/gomes-engine/render"
-	"github.com/mikabrytu/gomes-engine/ui"
 	"github.com/mikabrytu/gomes-engine/utils"
 )
 
@@ -26,61 +23,68 @@ func main() {
 	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
 	lifecycle.SetSmoothStep(0.9)
-
-	path := "test/assets/img/alien.png"
-	rect := utils.RectSpecs{
-		PosX:   (SCREEN_SIZE.X / 2) - 32,
-		PosY:   (SCREEN_SIZE.Y / 2) - 32,
-		Width:  64,
-		Height: 64,
-	}
-	sprite := render.NewSprite("Sprite", path, rect, render.White)
-	game_object := lifecycle.Register(&lifecycle.GameObject{
-		Start: func() {
-			sprite.Init()
-		},
-		Render: func() {
-			render.DrawRect(rect, render.White)
-		},
-	})
-
-	press_count := 0
-	ui_text := "Spaces pressed:"
-	font_specs := ui.FontSpecs{
-		Name: "Font",
-		Path: "test/assets/font/freesansbold.ttf",
-		Size: 32,
-	}
-	font := ui.NewFont(font_specs, SCREEN_SIZE)
-	font.Init(ui_text, render.White, math.Vector2{X: 0, Y: 0})
-	font.AlignText(ui.TopCenter, math.Vector2{X: 0, Y: 16})
-
-	// Event Listeners
+	render.SetBackgroundColor(render.Pink)
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {
 		lifecycle.Kill()
 	})
 
-	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK_DOWN, func(data any) {
-		click := data.(events.InputMouseClickDownEvent)
+	rect := utils.RectSpecs{
+		PosX:   0,
+		PosY:   0,
+		Width:  64,
+		Height: 64,
+	}
+	fontspecs := render.FontSpecs{
+		Name: "Font",
+		Path: "test/assets/font/freesansbold.ttf",
+		Size: 32,
+	}
 
-		if click.Index.Left == 1 {
-			sprite.Disable()
-			font.Disable()
-			lifecycle.Disable(game_object)
-		}
+	sprite := render.NewSprite(
+		"Green",
+		"test/assets/img/alien.png",
+		rect,
+		render.Red,
+	)
+	font := render.NewFont(fontspecs, SCREEN_SIZE)
 
-		if click.Index.Right == 1 {
-			sprite.Enable()
-			font.Enable()
-			lifecycle.Enable(game_object)
-		}
+	anchor := render.TopLeft
+	offset := math.Vector2{X: 16, Y: 16}
+	lifecycle.Register(&lifecycle.GameObject{
+		Start: func() {
+			sprite.Init()
+			font.Init("Texto!", render.White, math.Vector2{X: 0, Y: 0})
+		},
+		Update: func() {
+			rect.PosX += 1
+			sprite.UpdateRect(rect)
+
+			font.AlignText(anchor, offset)
+		},
+		Destroy: func() {
+			sprite.Clear()
+			font.Clear()
+		},
 	})
 
 	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
-		press_count += 1
-		message := ui_text + " " + fmt.Sprint(press_count)
-		font.UpdateText(message)
+		sprite.UpdateImage("test/assets/img/mario.png", render.Blue)
+
+		font.UpdateText("More Text to render...")
+		font.UpdateColor(render.Magenta)
+		anchor = render.TopCenter
+		offset.X = 0
+	})
+
+	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
+		if sprite.IsEnable() {
+			sprite.Disable()
+			font.Disable()
+		} else {
+			sprite.Enable()
+			font.Enable()
+		}
 	})
 
 	gomesengine.Run()

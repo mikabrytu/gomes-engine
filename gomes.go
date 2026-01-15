@@ -2,6 +2,7 @@ package gomesengine
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/mikabrytu/gomes-engine/audio"
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -19,6 +20,7 @@ func HiGomes() {
 }
 
 func Init(Title string, ScreenWidth, ScreenHeight int32) {
+	runtime.LockOSThread()
 	debug.DisableDebug()
 
 	dependencies.Init()

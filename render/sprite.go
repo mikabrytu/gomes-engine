@@ -2,95 +2,63 @@ package render
 
 import (
 	"github.com/mikabrytu/gomes-engine/utils"
-	"github.com/veandco/go-sdl2/img"
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 type Sprite struct {
 	name    string
 	path    string
-	texture *sdl.Texture
-	copy    CopySpecs
 	rect    utils.RectSpecs
 	color   Color
+	enabled bool
+	update  bool
 }
 
 func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Sprite {
 	sprite := &Sprite{
-		name:  name,
-		path:  path,
-		rect:  rect,
-		color: color,
+		name:    name,
+		path:    path,
+		rect:    rect,
+		color:   color,
+		enabled: true,
+		update:  false,
 	}
 
 	return sprite
 }
 
-// It prepares the necessary render dependencies and register the texture in the render loop.
-// Color is an optional tint rgb value that can be multiplied to the texture.
-// Use any transparent color to ignore this step
 func (s *Sprite) Init() {
-	s.newTexture()
-	s.newRect()
+	RegisterSprite(s)
+}
 
-	AddToRenderer(&s.copy)
+func (s *Sprite) Clear() {
+	ClearSprite(s)
 }
 
 func (s *Sprite) Enable() {
-	s.copy.Render = true
+	s.enabled = true
 }
 
 func (s *Sprite) Disable() {
-	s.copy.Render = false
+	s.enabled = false
 }
 
-func (s *Sprite) IsEnabled() bool {
-	return s.copy.Render
+func (s *Sprite) IsEnable() bool {
+	return s.enabled
+}
+
+func (s *Sprite) UpdateImage(path string, color Color) {
+	s.path = path
+	s.color = color
+
+	s.Clear()
+	s.Init()
 }
 
 func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
 	s.rect = rect
-	s.newRect()
-}
-
-func (s *Sprite) UpdateColor(color Color) {
-	s.color = color
-	s.newRect()
-}
-
-func (s *Sprite) UpdateImage(path string) {
-	s.path = path
-	s.newTexture()
+	s.update = true
 }
 
 func (s *Sprite) GetRect() utils.RectSpecs {
 	return s.rect
-}
-
-func (s *Sprite) ClearSprite() {
-	RemoveFromRenderer(&s.copy)
-	s.texture.Destroy()
-}
-
-func (s *Sprite) newTexture() {
-	var err error
-	s.texture, err = img.LoadTexture(renderer, s.path)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func (s *Sprite) newRect() {
-	s.copy = CopySpecs{
-		Texture: s.texture,
-		Rect: sdl.Rect{
-			X: int32(s.rect.PosX),
-			Y: int32(s.rect.PosY),
-			W: int32(s.rect.Width),
-			H: int32(s.rect.Height),
-		},
-		Color:  s.color,
-		Update: true,
-		Render: true,
-	}
 }

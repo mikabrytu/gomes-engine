@@ -95,6 +95,17 @@ func RegisterTexture(texture *sdl.Texture, rect utils.RectSpecs) {
 	copies = append(copies, copy)
 }
 
+func RemoveTexture(texture *sdl.Texture) {
+	for i, copy := range copies {
+		if copy.texture != texture {
+			continue
+		}
+
+		copies = append(copies[:i], copies[i+1:]...)
+		println("Copy removed from list")
+	}
+}
+
 func GetRenderer() *sdl.Renderer {
 	return renderer
 }

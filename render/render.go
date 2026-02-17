@@ -104,6 +104,13 @@ func Render() {
 
 		if copy.sprite.update {
 			copy.sprite.update = false
+			copy.texture.SetAlphaMod(copy.sprite.color.A)
+			copy.texture.SetColorMod(
+				copy.sprite.color.R,
+				copy.sprite.color.G,
+				copy.sprite.color.B,
+			)
+
 			copy.rect = &sdl.Rect{
 				X: int32(copy.sprite.rect.PosX),
 				Y: int32(copy.sprite.rect.PosY),
@@ -126,6 +133,7 @@ func Render() {
 
 		if copy.font.update {
 			copy.font.update = false
+			copy.texture.SetAlphaMod(copy.font.color.A)
 			copy.texture.SetColorMod(
 				copy.font.color.R,
 				copy.font.color.G,

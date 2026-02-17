@@ -54,6 +54,15 @@ func (s *Sprite) UpdateImage(path string, color Color) {
 	s.Init()
 }
 
+func (s *Sprite) UpdateColor(color Color) {
+	s.color = color
+	s.update = true
+}
+
+func (s *Sprite) GetColor() Color {
+	return s.color
+}
+
 func (s *Sprite) UpdateRect(rect utils.RectSpecs) {
 	s.rect = rect
 	s.update = true

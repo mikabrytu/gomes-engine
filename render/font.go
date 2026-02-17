@@ -78,14 +78,33 @@ func (f *Font) UpdateText(text string) {
 	f.Init(text, f.color, f.position)
 }
 
+func (f *Font) GetText() string {
+	return f.text
+}
+
 func (f *Font) UpdateColor(color Color) {
 	f.color = color
 	f.update = true
 }
 
+func (f *Font) GetColor() Color {
+	return f.color
+}
+
 func (f *Font) UpdatePosition(position math.Vector2) {
 	f.position = position
 	f.update = true
+}
+
+func (f *Font) GetPosition() math.Vector2 {
+	return f.position
+}
+
+func (f *Font) GetSize() math.Vector2 {
+	return math.Vector2{
+		f.rect.Width,
+		f.rect.Height,
+	}
 }
 
 func (f *Font) AlignText(anchor Anchor, offset math.Vector2) {

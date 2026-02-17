@@ -87,6 +87,14 @@ func main() {
 		} else {
 			sprite.Enable()
 			font.Enable()
+
+			scolor := sprite.GetColor()
+			scolor.A -= 5
+			sprite.UpdateColor(scolor)
+
+			fcolor := font.GetColor()
+			fcolor.A -= 5
+			font.UpdateColor(fcolor)
 		}
 	})
 

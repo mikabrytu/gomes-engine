@@ -1,6 +1,8 @@
 package main
 
 import (
+	"math/rand"
+
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -20,83 +22,77 @@ const REPEAT_EVENT string = "REPEAT_EVENT"
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Version 1.4", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
+	gomesengine.Init("Version 1.4 - DEVELOP", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
 	debug.EnableDebug()
-	lifecycle.SetSmoothStep(0.9)
-	render.SetBackgroundColor(render.Pink)
 
-	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {
+	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {
 		lifecycle.Kill()
 	})
 
-	rect := utils.RectSpecs{
-		PosX:   0,
-		PosY:   0,
-		Width:  64,
-		Height: 64,
-	}
-	fontspecs := render.FontSpecs{
-		Name: "Font",
-		Path: "test/assets/font/freesansbold.ttf",
-		Size: 32,
-	}
-
-	sprite := render.NewSprite(
-		"Green",
-		"test/assets/img/alien.png",
-		rect,
-		render.Red,
-	)
-	font := render.NewFont(fontspecs, SCREEN_SIZE)
-
-	anchor := render.TopLeft
-	offset := math.Vector2{X: 16, Y: 16}
-	lifecycle.Register(&lifecycle.GameObject{
-		Start: func() {
-			sprite.Init()
-			font.Init("Texto!", render.White, math.Vector2{X: 0, Y: 0})
-		},
-		Update: func() {
-			rect.PosX += 1
-			sprite.UpdateRect(rect)
-
-			font.AlignText(anchor, offset)
-		},
-		Render: func() {
-			render.DrawRect(utils.RectSpecs{PosX: 0, PosY: 128, Width: 256, Height: 32}, render.Green)
-		},
-		Destroy: func() {
-			sprite.Clear()
-			font.Clear()
-		},
+	objs := make([]*obj, 0)
+	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_F, func(data any) {
+		println()
+		objs = append(objs, New())
 	})
 
-	events.Subscribe(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
-		sprite.UpdateImage("test/assets/img/mario.png", render.Blue)
+	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
+		index := rand.Intn(len(objs))
+		o := objs[index]
 
-		font.UpdateText("More Text to render...")
-		font.UpdateColor(render.Magenta)
-		anchor = render.TopCenter
-		offset.X = 0
-	})
-
-	events.Subscribe(events.Input, events.INPUT_MOUSE_CLICK, func(data any) {
-		if sprite.IsEnable() {
-			sprite.Disable()
-			font.Disable()
+		if o != nil {
+			lifecycle.Stop(o.Instace)
+			o = nil
 		} else {
-			sprite.Enable()
-			font.Enable()
-
-			scolor := sprite.GetColor()
-			scolor.A -= 5
-			sprite.UpdateColor(scolor)
-
-			fcolor := font.GetColor()
-			fcolor.A -= 5
-			font.UpdateColor(fcolor)
+			println("Nil object. Try again")
 		}
 	})
 
 	gomesengine.Run()
+}
+
+type obj struct {
+	Instace  *lifecycle.GameObject
+	Listener *events.EventListener
+	rect     utils.RectSpecs
+	name     string
+	color    render.Color
+}
+
+func New() *obj {
+	obj := &obj{
+		rect: utils.RectSpecs{
+			PosX:   rand.Intn(SCREEN_SIZE.X - 64),
+			PosY:   rand.Intn(SCREEN_SIZE.Y - 64),
+			Width:  64,
+			Height: 64,
+		},
+	}
+
+	obj.Listener = &events.EventListener{Id: 1001}
+	obj.Instace = lifecycle.Register(&lifecycle.GameObject{
+		Start: func() {
+			obj.Listener = events.AddListener(events.Input, events.INPUT_MOUSE_CLICK_DOWN, func(data any) {
+				click := data.(events.InputMouseClickDownEvent)
+
+				if click.Position.X > obj.rect.PosX && click.Position.X < (obj.rect.PosX+obj.rect.Width) &&
+					click.Position.Y > obj.rect.PosY && click.Position.Y < (obj.rect.PosY+obj.rect.Height) {
+					println("clicked at", obj.name)
+				}
+
+			})
+		},
+		Destroy: func() {
+			println("Removing Listener ", obj.Listener.Id)
+			events.RemoveListener(events.Input, events.INPUT_MOUSE_CLICK_DOWN, obj.Listener.Id)
+		},
+		Render: func() {
+			render.DrawRect(obj.rect, render.White)
+		},
+	})
+
+	return obj
+}
+
+func (o *obj) GetListenerId() uint64 {
+	return o.Listener.Id
 }

@@ -10,17 +10,24 @@ type Event interface {
 	GetType() EventType
 }
 
-type EventListener func(Event)
+type Callback func(Event)
+
+type EventListener struct {
+	Id       uint64
+	Callback Callback
+}
 
 type EventBus interface {
-	subscribe(eventType EventType, listener EventListener)
-	unsubscribe(eventType EventType)
+	subscribe(eventType EventType, callback Callback) *EventListener
+	unsubscribe(eventType EventType, id uint64)
 	publish(event Event)
+	count(eventType EventType) int
 }
 
 type eventBusImpl struct {
 	listeners map[EventType][]EventListener
 	mutex     sync.Mutex
+	nextId    uint64
 }
 
 func newBus() EventBus {
@@ -29,18 +36,31 @@ func newBus() EventBus {
 	}
 }
 
-func (bus *eventBusImpl) subscribe(eventType EventType, listener EventListener) {
+func (bus *eventBusImpl) subscribe(eventType EventType, callback Callback) *EventListener {
 	bus.mutex.Lock()
 	defer bus.mutex.Unlock()
 
+	bus.nextId++
+
+	listener := EventListener{
+		Id:       bus.nextId,
+		Callback: callback,
+	}
 	bus.listeners[eventType] = append(bus.listeners[eventType], listener)
+
+	return &listener
 }
 
-func (bus *eventBusImpl) unsubscribe(eventType EventType) {
-	bus.mutex.Lock()
-	defer bus.mutex.Unlock()
+func (bus *eventBusImpl) unsubscribe(eventType EventType, id uint64) {
+	bus.mutex.Unlock()
+	defer bus.mutex.Lock()
 
-	delete(bus.listeners, eventType)
+	for i, l := range bus.listeners[eventType] {
+		if l.Id == id {
+			bus.listeners[eventType] = append(bus.listeners[eventType][:i], bus.listeners[eventType][i+1:]...)
+			break
+		}
+	}
 }
 
 func (bus *eventBusImpl) publish(event Event) {
@@ -51,7 +71,11 @@ func (bus *eventBusImpl) publish(event Event) {
 
 	if ok {
 		for _, listener := range listeners {
-			listener(event)
+			listener.Callback(event)
 		}
 	}
+}
+
+func (bus *eventBusImpl) count(eventType EventType) int {
+	return len(bus.listeners[eventType])
 }

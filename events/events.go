@@ -44,48 +44,73 @@ func Emit(layer EventLayer, event any) {
 	}
 }
 
-func AddListener(layer EventLayer, key string, callback func(data any)) {
+func AddListener(layer EventLayer, key string, callback func(data any)) *EventListener {
+	listener := &EventListener{}
+
 	switch layer {
 	case Audio:
-		callBusSub(audioBus, EventType(key), callback)
+		listener = callBusSub(audioBus, EventType(key), callback)
 	case Game:
-		callBusSub(gameBus, EventType(key), callback)
+		listener = callBusSub(gameBus, EventType(key), callback)
 	case Input:
-		callBusSub(inputBus, EventType(key), callback)
+		listener = callBusSub(inputBus, EventType(key), callback)
 	case Lifecycle:
-		callBusSub(lifecycleBus, EventType(key), callback)
+		listener = callBusSub(lifecycleBus, EventType(key), callback)
 	case Physics:
-		callBusSub(physicsBus, EventType(key), callback)
+		listener = callBusSub(physicsBus, EventType(key), callback)
 	case Render:
-		callBusSub(renderBus, EventType(key), callback)
+		listener = callBusSub(renderBus, EventType(key), callback)
+	}
+
+	return listener
+}
+
+func RemoveListener(layer EventLayer, key string, id uint64) {
+	switch layer {
+	case Audio:
+		callBusUnsub(audioBus, EventType(key), id)
+	case Game:
+		callBusUnsub(gameBus, EventType(key), id)
+	case Input:
+		callBusUnsub(inputBus, EventType(key), id)
+	case Lifecycle:
+		callBusUnsub(lifecycleBus, EventType(key), id)
+	case Physics:
+		callBusUnsub(physicsBus, EventType(key), id)
+	case Render:
+		callBusUnsub(renderBus, EventType(key), id)
 	}
 }
 
-func RemoveListener(layer EventLayer, key string) {
+func GetListenerCount(layer EventLayer, key string) int {
+	count := 0
+
 	switch layer {
 	case Audio:
-		callBusUnsub(audioBus, EventType(key))
+		count = audioBus.count(EventType(key))
 	case Game:
-		callBusUnsub(gameBus, EventType(key))
+		count = gameBus.count(EventType(key))
 	case Input:
-		callBusUnsub(inputBus, EventType(key))
+		count = inputBus.count(EventType(key))
 	case Lifecycle:
-		callBusUnsub(lifecycleBus, EventType(key))
+		count = lifecycleBus.count(EventType(key))
 	case Physics:
-		callBusUnsub(physicsBus, EventType(key))
+		count = physicsBus.count(EventType(key))
 	case Render:
-		callBusUnsub(renderBus, EventType(key))
+		count = renderBus.count(EventType(key))
 	}
+
+	return count
 }
 
-func callBusSub(bus EventBus, eventType EventType, callback func(data any)) {
-	bus.subscribe(eventType, func(e Event) {
+func callBusSub(bus EventBus, eventType EventType, callback func(data any)) *EventListener {
+	return bus.subscribe(eventType, func(e Event) {
 		callback(e)
 	})
 }
 
-func callBusUnsub(bus EventBus, eventType EventType) {
-	bus.unsubscribe(eventType)
+func callBusUnsub(bus EventBus, eventType EventType, id uint64) {
+	bus.unsubscribe(eventType, id)
 }
 
 func publishAsync(bus EventBus, event Event) {

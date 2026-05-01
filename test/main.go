@@ -1,8 +1,6 @@
 package main
 
 import (
-	"math/rand"
-
 	gomesengine "github.com/mikabrytu/gomes-engine"
 
 	"github.com/mikabrytu/gomes-engine/debug"
@@ -29,70 +27,38 @@ func main() {
 		lifecycle.Kill()
 	})
 
-	objs := make([]*obj, 0)
-	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_F, func(data any) {
-		println()
-		objs = append(objs, New())
-	})
+	rect := utils.RectSpecs{
+		PosX:   (SCREEN_SIZE.X / 2) - 64,
+		PosY:   (SCREEN_SIZE.Y / 2) - 64,
+		Width:  128,
+		Height: 128,
+	}
 
-	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_SPACE, func(data any) {
-		index := rand.Intn(len(objs))
-		o := objs[index]
+	sprite_1 := render.NewSprite("sprite-1", "test/assets/img/mario.png", rect, render.White, 1)
+	sprite_1.Init()
+	sprite_1.Enable()
 
-		if o != nil {
-			lifecycle.Stop(o.Instace)
-			o = nil
-		} else {
-			println("Nil object. Try again")
-		}
+	rect_2 := rect
+	rect_2.PosX += 64
+	rect_2.PosY += 64
+
+	sprite_2 := render.NewSprite("sprite-2", "test/assets/img/alien2.jpg", rect_2, render.White, 3)
+	sprite_2.Init()
+	sprite_2.Enable()
+
+	rect_3 := rect_2
+	rect_3.PosX += 64
+	rect_3.PosY += 64
+
+	sprite_3 := render.NewSprite("sprite-3", "test/assets/img/alien.png", rect_3, render.White, 2)
+	sprite_3.Init()
+	sprite_3.Enable()
+
+	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_ENTER, func(data any) {
+		sprite_1.Clear()
+		sprite_2.Clear()
+		sprite_3.Clear()
 	})
 
 	gomesengine.Run()
-}
-
-type obj struct {
-	Instace  *lifecycle.GameObject
-	Listener *events.EventListener
-	rect     utils.RectSpecs
-	name     string
-	color    render.Color
-}
-
-func New() *obj {
-	obj := &obj{
-		rect: utils.RectSpecs{
-			PosX:   rand.Intn(SCREEN_SIZE.X - 64),
-			PosY:   rand.Intn(SCREEN_SIZE.Y - 64),
-			Width:  64,
-			Height: 64,
-		},
-	}
-
-	obj.Listener = &events.EventListener{Id: 1001}
-	obj.Instace = lifecycle.Register(&lifecycle.GameObject{
-		Start: func() {
-			obj.Listener = events.AddListener(events.Input, events.INPUT_MOUSE_CLICK_DOWN, func(data any) {
-				click := data.(events.InputMouseClickDownEvent)
-
-				if click.Position.X > obj.rect.PosX && click.Position.X < (obj.rect.PosX+obj.rect.Width) &&
-					click.Position.Y > obj.rect.PosY && click.Position.Y < (obj.rect.PosY+obj.rect.Height) {
-					println("clicked at", obj.name)
-				}
-
-			})
-		},
-		Destroy: func() {
-			println("Removing Listener ", obj.Listener.Id)
-			events.RemoveListener(events.Input, events.INPUT_MOUSE_CLICK_DOWN, obj.Listener.Id)
-		},
-		Render: func() {
-			render.DrawRect(obj.rect, render.White)
-		},
-	})
-
-	return obj
-}
-
-func (o *obj) GetListenerId() uint64 {
-	return o.Listener.Id
 }

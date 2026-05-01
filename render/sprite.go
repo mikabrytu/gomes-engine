@@ -9,16 +9,18 @@ type Sprite struct {
 	path    string
 	rect    utils.RectSpecs
 	color   Color
+	order   int
 	enabled bool
 	update  bool
 }
 
-func NewSprite(name string, path string, rect utils.RectSpecs, color Color) *Sprite {
+func NewSprite(name string, path string, rect utils.RectSpecs, color Color, order int) *Sprite {
 	sprite := &Sprite{
 		name:    name,
 		path:    path,
 		rect:    rect,
 		color:   color,
+		order:   order,
 		enabled: true,
 		update:  false,
 	}

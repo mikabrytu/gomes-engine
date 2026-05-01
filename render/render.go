@@ -1,6 +1,9 @@
 package render
 
 import (
+	"fmt"
+	"sort"
+
 	"github.com/mikabrytu/gomes-engine/debug"
 	"github.com/mikabrytu/gomes-engine/lifecycle"
 	"github.com/mikabrytu/gomes-engine/utils"
@@ -32,12 +35,13 @@ type CopyFont struct {
 var window *sdl.Window
 var renderer *sdl.Renderer
 
-var spriteCreateQueue []*Sprite
+var spriteCreateQueue map[int]*Sprite
 var spriteDestroyQueue []*Sprite
 var fontCreateQueue []*Font
 var fontDestroyQueue []*Font
-var spriteCopies []CopySprite
+var spriteCopies map[int]CopySprite
 var fontCopies []CopyFont
+var orderKeys []int
 
 var backgroundColor Color
 
@@ -54,12 +58,13 @@ func CreateScreen(s ScreenSpecs) {
 		panic(err)
 	}
 
-	spriteCreateQueue = make([]*Sprite, 0)
+	spriteCreateQueue = make(map[int]*Sprite)
 	spriteDestroyQueue = make([]*Sprite, 0)
 	fontCreateQueue = make([]*Font, 0)
 	fontDestroyQueue = make([]*Font, 0)
-	spriteCopies = make([]CopySprite, 0)
+	spriteCopies = make(map[int]CopySprite, 0)
 	fontCopies = make([]CopyFont, 0)
+	orderKeys = make([]int, 0)
 
 	backgroundColor = Black
 }
@@ -97,7 +102,13 @@ func Render() {
 	createSprites()
 	createFonts()
 
-	for _, copy := range spriteCopies {
+	for _, key := range orderKeys {
+		copy := spriteCopies[key]
+
+		if copy.sprite == nil {
+			continue
+		}
+
 		if copy.sprite.enabled == false {
 			continue
 		}
@@ -157,7 +168,11 @@ func Render() {
 }
 
 func RegisterSprite(sprite *Sprite) {
-	spriteCreateQueue = append(spriteCreateQueue, sprite)
+	if debug.IsEnabled() {
+		println(fmt.Sprintf("::RegisterSprite:: -> sprite name: %v | order: %v", sprite.name, sprite.order))
+	}
+
+	spriteCreateQueue[sprite.order] = sprite
 }
 
 func RegisterFont(font *Font) {
@@ -192,7 +207,9 @@ func createSprites() {
 		return
 	}
 
-	for _, sprite := range spriteCreateQueue {
+	for key := range spriteCreateQueue {
+		sprite := spriteCreateQueue[key]
+
 		texture, err := img.LoadTexture(renderer, sprite.path)
 		if err != nil {
 			panic(err)
@@ -209,10 +226,22 @@ func createSprites() {
 			},
 			color: sprite.color,
 		}
-		spriteCopies = append(spriteCopies, copy)
+
+		spriteCopies[key] = copy
+
+		if debug.IsEnabled() {
+			println(fmt.Sprintf("::createSprites:: -> Copy of sprite %v is created and added to copy collection at key %v", sprite.name, key))
+		}
 	}
 
-	spriteCreateQueue = spriteCreateQueue[:0]
+	for key := range spriteCreateQueue {
+		orderKeys = append(orderKeys, key)
+	}
+	sort.Ints(orderKeys)
+
+	for key := range spriteCreateQueue {
+		delete(spriteCreateQueue, key)
+	}
 }
 
 func createFonts() {
@@ -269,7 +298,9 @@ func destroySprites() {
 	}
 
 	for _, sprite := range spriteDestroyQueue {
-		for i, copy := range spriteCopies {
+		for key := range spriteCopies {
+			copy := spriteCopies[key]
+
 			if copy.sprite != sprite {
 				continue
 			}
@@ -279,7 +310,7 @@ func destroySprites() {
 				panic(err)
 			}
 
-			spriteCopies = append(spriteCopies[:i], spriteCopies[i+1:]...)
+			delete(spriteCopies, key)
 			break
 		}
 	}

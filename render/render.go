@@ -311,6 +311,14 @@ func destroySprites() {
 			}
 
 			delete(spriteCopies, key)
+
+			for i, k := range orderKeys {
+				if k == key {
+					orderKeys = append(orderKeys[:i], orderKeys[i+1:]...)
+					break
+				}
+			}
+
 			break
 		}
 	}

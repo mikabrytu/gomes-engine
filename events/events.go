@@ -1,5 +1,7 @@
 package events
 
+import "github.com/mikabrytu/gomes-engine/debug"
+
 type EventLayer int
 
 const (
@@ -28,6 +30,14 @@ func Init() {
 }
 
 func Emit(layer EventLayer, event any) {
+	if event == nil {
+		if debug.IsEnabled() {
+			println("Event is not valid")
+		}
+
+		return
+	}
+
 	switch layer {
 	case Audio:
 		publishAsync(audioBus, event.(Event))

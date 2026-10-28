@@ -16,8 +16,6 @@ type KeyboardEvent struct {
 	name any
 }
 
-var pressCount int = 0
-
 func ListenToInput() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch event := event.(type) {
@@ -346,15 +344,12 @@ func handleKeyboard(e *sdl.KeyboardEvent) {
 
 	switch e.State {
 	case sdl.PRESSED:
-		pressCount++
-
-		if pressCount > 1 {
+		if e.Repeat > 1 {
 			emit(pressingEvents, e.Keysym.Sym)
 		} else {
 			emit(pressedEvents, e.Keysym.Sym)
 		}
 	case sdl.RELEASED:
-		pressCount = 0
 		emit(releasedEvents, e.Keysym.Sym)
 	}
 }

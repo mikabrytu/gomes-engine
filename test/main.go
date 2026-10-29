@@ -20,7 +20,7 @@ const REPEAT_EVENT string = "REPEAT_EVENT"
 
 func main() {
 	gomesengine.HiGomes()
-	gomesengine.Init("Version 1.4 - DEVELOP", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y))
+	gomesengine.Init("Version 1.4 - DEVELOP", int32(SCREEN_SIZE.X), int32(SCREEN_SIZE.Y), render.Windowed)
 	debug.EnableDebug()
 
 	events.AddListener(events.Input, events.INPUT_KEYBOARD_PRESSED_ESCAPE, func(data any) {

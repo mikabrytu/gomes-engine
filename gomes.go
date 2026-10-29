@@ -19,7 +19,7 @@ func HiGomes() {
 	fmt.Println("Hi Gomes!")
 }
 
-func Init(Title string, ScreenWidth, ScreenHeight int32) {
+func Init(Title string, ScreenWidth, ScreenHeight int32, Mode render.ScreenModes) {
 	runtime.LockOSThread()
 	debug.DisableDebug()
 
@@ -27,7 +27,7 @@ func Init(Title string, ScreenWidth, ScreenHeight int32) {
 	events.Init()
 	lifecycle.Init()
 
-	setupScreen(Title, ScreenWidth, ScreenHeight)
+	setupScreen(Title, ScreenWidth, ScreenHeight, Mode)
 	setupInput()
 	setupPhysics()
 	setupAudio()
@@ -41,13 +41,14 @@ func Run() {
 	lifecycle.Run()
 }
 
-func setupScreen(title string, width, height int32) {
+func setupScreen(title string, width, height int32, mode render.ScreenModes) {
 	specs := render.ScreenSpecs{
 		Title:  title,
 		Posx:   sdl.WINDOWPOS_CENTERED, // TODO: Make flags default positions
 		Posy:   sdl.WINDOWPOS_CENTERED,
 		Width:  width,
 		Height: height,
+		Mode:   mode,
 	}
 	render.CreateScreen(specs)
 	lifecycle.RegisterRender(lifecycle.GameObject{

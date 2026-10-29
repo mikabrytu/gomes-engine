@@ -11,12 +11,20 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
+type ScreenModes uint32
+
+const (
+	Fullscren ScreenModes = iota
+	Windowed
+)
+
 type ScreenSpecs struct {
 	Title  string
 	Posx   int32
 	Posy   int32
 	Width  int32
 	Height int32
+	Mode   ScreenModes
 }
 
 type CopySprite struct {
@@ -48,7 +56,15 @@ var backgroundColor Color
 func CreateScreen(s ScreenSpecs) {
 	var err error
 
-	window, err = sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, sdl.WINDOW_SHOWN)
+	mode := sdl.WINDOWEVENT_HIDDEN
+	switch s.Mode {
+	case Fullscren:
+		mode = sdl.WINDOW_FULLSCREEN
+	case Windowed:
+		mode = sdl.WINDOW_SHOWN
+	}
+
+	window, err = sdl.CreateWindow(s.Title, s.Posx, s.Posy, s.Width, s.Height, uint32(mode))
 	if err != nil {
 		panic(err)
 	}
